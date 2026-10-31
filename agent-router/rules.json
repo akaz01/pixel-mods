@@ -1,0 +1,14 @@
+{
+  "types": {
+    "Explore": "haiku",
+    "code-reviewer": "sonnet",
+    "ecc:code-reviewer": "sonnet",
+    "tdd-guide": "sonnet",
+    "ecc:tdd-guide": "sonnet",
+    "architect": "opus",
+    "ecc:architect": "opus",
+    "planner": "opus",
+    "ecc:planner": "opus"
+  },
+  "limits": { "concurrent": 4, "background": 2 }
+}

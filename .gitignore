@@ -1,0 +1,6 @@
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
+
+# Engine-generated type files inside each mod, rewritten on every load.
+*/.claude-plugin/types/
+node_modules/
