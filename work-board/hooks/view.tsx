@@ -1,6 +1,6 @@
 import type { Elements, PluginState, RenderChildren } from 'claude-code'
 
-import { bar, clock, duration, minutesToFull, refillText, short, tierOf, untilText } from './collect'
+import { bar, clock, isGoneFromParty, duration, minutesToFull, refillText, short, tierOf, untilText } from './collect'
 import type { Ram } from './collect'
 import type { AgentRow, FileRow, MainRow, PlanInfo, Step, Turn, UsageInfo, UsageRow } from '../types'
 
@@ -514,7 +514,8 @@ const filesWin = (el: El, d: BoardData, shown: number) => {
 const running = (el: El, d: BoardData) => {
   const live = d.agents.filter(a => LIVE.has(a.status))
   const limit = d.router?.limits?.concurrent ?? 4
-  const party = d.agents.slice(-6).map(a => row(el,
+  // A finished agent shows as DONE for 10 s, then leaves; the board may redraw before the next poll drops it.
+  const party = d.agents.filter(a => !isGoneFromParty(a, d.now)).slice(-6).map(a => row(el,
     <el.Text color={LIVE.has(a.status) ? P.white : P.dim} wrap="truncate-end">{up(short(a.type, 18))}</el.Text>,
     <el.Text>{model(el, a.model)} {agentStatus(el, a)}</el.Text>))
   const top = [...d.plugins].sort((a, b) => b.count - a.count).slice(0, 4)

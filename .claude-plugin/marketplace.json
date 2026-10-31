@@ -1,0 +1,10 @@
+{
+  "name": "pixel-mods",
+  "owner": { "name": "akaz01" },
+  "plugins": [
+    { "name": "work-board", "source": "./work-board" },
+    { "name": "agent-router", "source": "./agent-router" },
+    { "name": "collab-hub", "source": "./collab-hub" },
+    { "name": "safe-shell", "source": "./safe-shell" }
+  ]
+}

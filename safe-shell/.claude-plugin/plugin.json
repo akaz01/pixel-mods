@@ -1,6 +1,7 @@
 {
   "name": "safe-shell",
   "version": "0.1.0",
+  "author": { "name": "akaz01" },
   "description": "Three-level guard for shell commands: CAUTION notifies, DANGER blocks with a safer alternative (/allow-once), FORBIDDEN always blocks.",
   "types": "./types/index.d.ts"
 }

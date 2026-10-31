@@ -1,7 +1,7 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-import { bump, FILE_TOOLS, MAX_ROWS, parseMeminfo, parseVmStat, parseWinMemory, planOf, pluginOfSkill, pluginOfTool, readWindows, recordDay, redact, short, stepDetail, stepTarget, touchFile } from './collect'
+import { bump, FILE_TOOLS, isGoneFromParty, MAX_ROWS, parseMeminfo, parseVmStat, parseWinMemory, planOf, pluginOfSkill, pluginOfTool, readWindows, recordDay, redact, short, stepDetail, stepTarget, touchFile } from './collect'
 import type { Ram, RateLimit } from './collect'
 import { HELP_TAB, renderBoard } from './view'
 import type { BoardData } from './view'
@@ -96,13 +96,16 @@ const refreshAgents = async ($: EngineInterface) => {
   const listed = await $.agent.list()
   const rows = await read($, agents)
   const known = new Map(rows.map(r => [r.id, r]))
+  const now = Date.now()
+  // A row that stopped running keeps the time it stopped, so the party can drop it a few seconds later.
+  const stamped = (row: AgentRow): AgentRow => (LIVE.has(row.status) ? row : { ...row, doneAt: row.doneAt ?? now })
   const fresh = listed.map(info => {
     const old = known.get(info.id)
-    return { id: info.id, type: info.type, model: old?.model, status: info.status, tools: old?.tools ?? 0, lastAt: old?.lastAt ?? Date.now() }
+    return stamped({ id: info.id, type: info.type, model: old?.model, status: info.status, tools: old?.tools ?? 0, lastAt: old?.lastAt ?? now, doneAt: old?.doneAt })
   })
   // An agent the engine no longer lists has finished, whatever it last reported.
-  const gone = rows.filter(r => !listed.some(info => info.id === r.id)).map(r => (LIVE.has(r.status) ? { ...r, status: 'completed' } : r))
-  const next = [...gone, ...fresh].slice(-MAX_ROWS)
+  const gone = rows.filter(r => !listed.some(info => info.id === r.id)).map(r => stamped(LIVE.has(r.status) ? { ...r, status: 'completed' } : r))
+  const next = [...gone, ...fresh].filter(r => !isGoneFromParty(r, now)).slice(-MAX_ROWS)
   if (JSON.stringify(next) !== JSON.stringify(rows)) await update($, agents, () => next)
 }
 

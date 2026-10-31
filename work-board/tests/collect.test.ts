@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'claude-code/testing'
 
-import { bar, bump, refillText, duration, minutesToFull, pluginOfSkill, pluginOfTool, readWindows, recordDay, parseMeminfo, parseVmStat, parseWinMemory, planOf, redact, short, stepDetail, stepTarget, tierOf, touchFile } from '../hooks/collect'
+import { bar, bump, isGoneFromParty, refillText, duration, minutesToFull, pluginOfSkill, pluginOfTool, readWindows, recordDay, parseMeminfo, parseVmStat, parseWinMemory, planOf, redact, short, stepDetail, stepTarget, tierOf, touchFile } from '../hooks/collect'
 
 describe('collect', () => {
   test('short cuts long text with an ellipsis', async () => {
@@ -108,4 +108,11 @@ test('refillText shows hours and minutes under a day, days and hours from a day 
   expect(refillText('2026-10-31T00:05:00Z', now)).toBe('0H 05M')
   expect(refillText('2026-11-03T04:00:00Z', now)).toBe('3D 04H')
   expect(refillText(undefined, now)).toBeUndefined()
+})
+
+test('a finished agent leaves the party 10 s after it stopped', () => {
+  const row = { id: 'a', type: 'Explore', status: 'completed', tools: 0, lastAt: 0, doneAt: 1000 }
+  expect(isGoneFromParty(row, 5000)).toBe(false)
+  expect(isGoneFromParty(row, 11_000)).toBe(true)
+  expect(isGoneFromParty({ doneAt: undefined }, 99_000)).toBe(false)
 })

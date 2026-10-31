@@ -183,3 +183,7 @@ export const parseMeminfo = (text: string): Ram | undefined => {
   if (!total) return undefined
   return { usedBytes: (total - kb('MemAvailable')) * 1024, totalBytes: total * 1024 }
 }
+
+// A finished agent stays in the party as DONE for 10 s, then leaves it.
+export const DONE_LINGER_MS = 10_000
+export const isGoneFromParty = (row: { doneAt?: number }, now: number): boolean => row.doneAt !== undefined && now - row.doneAt >= DONE_LINGER_MS

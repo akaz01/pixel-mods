@@ -5,6 +5,8 @@ export type AgentRow = {
   status: string
   tools: number
   lastAt: number
+  // When the agent stopped running; the party shows it as DONE for a while, then drops it.
+  doneAt?: number
 }
 
 export type UsageRow = { name: string; count: number; lastAt: number }
