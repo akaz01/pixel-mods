@@ -1,6 +1,82 @@
 # pixel-mods
 
-Claude Code용 mod 네 개를 모아 둔 비공개 저장소입니다. 픽셀 아트 스타일의 작업 보드(work-board)와, 보드가 읽어 가는 세 가지 보조 mod(agent-router, collab-hub, safe-shell)로 이루어져 있습니다. 각 mod는 독립된 플러그인 폴더이며, work-board는 나머지 세 mod를 의존성으로 선언합니다.
+Claude Code용 mod 네 개를 모아 둔 저장소입니다. 픽셀 아트 스타일의 작업 보드(work-board)와, 보드가 읽어 가는 세 가지 보조 mod(agent-router, collab-hub, safe-shell)로 이루어져 있습니다. 각 mod는 독립된 플러그인 폴더이며, work-board는 나머지 세 mod를 의존성으로 선언합니다.
+
+같은 네 mod를 **Windows 버전**(저장소 루트, `<mod>@pixel-mods`)과 **macOS 버전**(`macos/` 폴더, `<mod>-macos@pixel-mods`) 두 벌로 둡니다. 한 컴퓨터에는 그 OS에 맞는 한 벌만 설치합니다. 두 벌을 같이 켜면 `/board` 같은 명령이 겹쳐서 나중에 켜진 쪽이 거부됩니다. 명령 이름과 화면은 두 버전이 같습니다.
+
+## 설치
+
+[Claude Code](https://claude.com/claude-code)가 설치되어 있어야 합니다. 아래 한 줄을 복사해서 붙여 넣으면 나머지는 알아서 진행됩니다.
+
+**Mac:** 터미널(Terminal) 앱을 열고 붙여 넣은 뒤 Enter를 누릅니다.
+
+```
+curl -fsSL https://raw.githubusercontent.com/akaz01/pixel-mods/main/install.sh | bash
+```
+
+**Windows:** PowerShell을 열고 붙여 넣은 뒤 Enter를 누릅니다.
+
+```
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/akaz01/pixel-mods/main/install.ps1)))
+```
+
+실행하면 어느 버전을 설치할지 묻습니다.
+
+```
+Which version of pixel-mods should be installed?
+  1) Windows
+  2) macOS
+Choose 1 or 2 [2]:
+```
+
+- 지금 쓰는 컴퓨터에 맞는 번호를 누릅니다. 대괄호 안의 번호가 이 컴퓨터에 맞춰 미리 골라 둔 값이라, 그냥 Enter만 눌러도 됩니다.
+- 고른 버전의 네 mod가 설치됩니다. 다른 버전이 이미 깔려 있으면 먼저 지웁니다. 두 버전을 같이 켜면 `/board` 같은 명령이 겹치기 때문입니다.
+- `Done.`이 나오면 끝입니다. Claude Code를 새로 열면 오른쪽에 Work Board가 자동으로 열립니다.
+
+설치한 뒤에는 따로 켤 필요가 없습니다.
+
+- 보드를 `/board close`로 닫으면 다음 세션부터는 자동으로 열리지 않습니다. 다시 `/board`로 열면 그다음 세션부터 다시 자동으로 열립니다.
+- mod를 잠시 끄려면 `claude plugin disable <mod>@pixel-mods`, 다시 켜려면 `claude plugin enable <mod>@pixel-mods`를 씁니다. macOS에서는 mod 이름 뒤에 `-macos`가 붙습니다(예: `work-board-macos@pixel-mods`).
+
+### 업데이트
+
+설치할 때와 같은 한 줄을 다시 실행합니다. 새 버전을 받아서 다시 설치합니다.
+
+### 지우기
+
+Windows:
+
+```
+claude plugin uninstall work-board@pixel-mods
+claude plugin uninstall agent-router@pixel-mods
+claude plugin uninstall collab-hub@pixel-mods
+claude plugin uninstall safe-shell@pixel-mods
+claude plugin marketplace remove pixel-mods
+```
+
+Mac:
+
+```
+claude plugin uninstall work-board-macos@pixel-mods
+claude plugin uninstall agent-router-macos@pixel-mods
+claude plugin uninstall collab-hub-macos@pixel-mods
+claude plugin uninstall safe-shell-macos@pixel-mods
+claude plugin marketplace remove pixel-mods
+```
+
+### Windows 버전과 macOS 버전
+
+두 버전은 명령과 기능이 같습니다. macOS 버전은 Mac 기본 터미널에서 깨끗하게 보이도록 다음이 다릅니다.
+
+- work-board: macOS 기본 터미널(Terminal.app)은 블록 글자(`█▄▀`)를 글꼴로 그려서 칸 사이에 틈이 생기고, 겹선 테두리(`╔═╗`)도 점선처럼 끊깁니다. 그래서 macOS 버전은 다음처럼 그립니다. 글꼴이나 터미널 설정은 바꾸지 않아도 됩니다.
+  - 캐릭터는 배경색 칸으로만 그립니다.
+  - 창 테두리는 Terminal.app에서 깨끗하게 이어지는 둥근 홑선(`╭─╮`)을 씁니다.
+  - 말풍선은 흰 칸으로 그리고, 글자는 한가운데에 들어갑니다. 왼쪽 날개가 꼬리가 되어 캐릭터를 가리킵니다.
+  - 창 너비를 넘는 줄은 잘라서 보드 오른쪽 밖으로 찌꺼기가 남지 않게 하고, 오른쪽 끝에 여백을 둡니다.
+- work-board: RAM은 Activity Monitor와 같은 기준(앱 메모리 + wired + 압축)으로 `vm_stat`, `sysctl`에서 읽습니다.
+- collab-hub: 경로는 `/` 기준이고, 한글 파일 이름의 NFD/NFC 차이와 대소문자를 같은 파일로 봅니다. `/claim ~/파일`의 `~`는 홈 폴더입니다.
+- safe-shell: PowerShell 규칙 대신 macOS 규칙을 씁니다. `/Users/<이름>`, `/System`, `/Library`, `/Applications`, `/usr` 같은 시스템 폴더 삭제와 `diskutil erase…`/`partitionDisk`는 FORBIDDEN입니다.
+
 
 ## Mods
 
@@ -66,79 +142,9 @@ Bash와 PowerShell 명령을 실행 전에 검사하는 3단계 guard입니다.
 | `/allow-once [off]` | 다음 DANGER 명령 하나를 한 번 통과시킵니다. `off`는 취소합니다. |
 | `/safe-shell` | safe-shell level 규칙과 이번 세션 횟수를 보여 줍니다. |
 
-## 설치
-
-work-board는 나머지 세 mod를 함께 쓰므로 네 개를 모두 설치합니다.
-
-설치한 뒤에는 따로 켤 필요가 없습니다. 새로 여는 Claude 세션마다 네 mod가 자동으로 켜지고, Work Board 창도 자동으로 열립니다.
-
-- 보드를 `/board close`로 닫으면, 다음 세션부터는 보드가 자동으로 열리지 않습니다. mod 자체는 계속 켜져 있습니다.
-- 다시 `/board`로 열면, 그다음 세션부터 다시 자동으로 열립니다.
-- mod를 잠시 끄려면 `claude plugin disable <mod>@pixel-mods`, 다시 켜려면 `claude plugin enable <mod>@pixel-mods`를 씁니다.
-
-### 준비
-
-이 저장소는 비공개입니다. 설치할 컴퓨터에서 이 저장소에 접근할 수 있는 GitHub 계정으로 먼저 로그인합니다.
-
-```
-gh auth login
-```
-
-### 방법 1. 터미널 명령 (추천)
-
-PowerShell이나 터미널에서 아래 줄을 차례로 실행합니다. `--scope user`는 모든 폴더에서 쓰는 설치입니다.
-
-```
-claude plugin marketplace add akaz01/pixel-mods
-claude plugin install work-board@pixel-mods --scope user
-claude plugin install agent-router@pixel-mods --scope user
-claude plugin install collab-hub@pixel-mods --scope user
-claude plugin install safe-shell@pixel-mods --scope user
-```
-
-설치가 됐는지는 `claude plugin list`로 확인합니다. 네 mod가 `@pixel-mods`, `Scope: user`로 보이면 됩니다.
-
-### 방법 2. Claude Code 입력창
-
-Claude Code 터미널 세션의 입력창에 아래 줄을 하나씩 입력합니다.
-
-```
-/plugin install work-board --marketplace akaz01/pixel-mods
-/plugin install agent-router --marketplace akaz01/pixel-mods
-/plugin install collab-hub --marketplace akaz01/pixel-mods
-/plugin install safe-shell --marketplace akaz01/pixel-mods
-```
-
-- 처음 한 번은 마켓플레이스를 추가할지 묻습니다. `y`를 누르고 설치 범위(scope)를 고릅니다. 모든 폴더에서 쓰려면 user를 고릅니다.
-- 데스크톱 앱의 Code 탭에서는 이 명령을 쓸 수 없습니다. 터미널에서 user 범위로 설치하면 데스크톱 앱에서도 켜집니다.
-
-### 업데이트
-
-저장소에 새 버전이 올라오면 각 컴퓨터에서 마켓플레이스를 새로 받은 뒤 mod를 업데이트합니다. 바뀐 mod만 업데이트해도 됩니다.
-
-```
-claude plugin marketplace update pixel-mods
-claude plugin update work-board@pixel-mods
-claude plugin update agent-router@pixel-mods
-claude plugin update collab-hub@pixel-mods
-claude plugin update safe-shell@pixel-mods
-```
-
-업데이트가 잡히지 않으면 해당 mod의 `.claude-plugin/plugin.json`에서 `version`을 올려 다시 올립니다.
-
-### 지우기
-
-```
-claude plugin uninstall work-board@pixel-mods
-claude plugin uninstall agent-router@pixel-mods
-claude plugin uninstall collab-hub@pixel-mods
-claude plugin uninstall safe-shell@pixel-mods
-claude plugin marketplace remove pixel-mods
-```
-
 ## Folder layout
 
-각 mod는 저장소 루트의 `<mod>/` 폴더이고, 루트의 `.claude-plugin/marketplace.json`이 네 mod를 마켓플레이스로 묶습니다.
+Windows 버전은 저장소 루트의 `<mod>/`, macOS 버전은 `macos/<mod>/` 폴더이고, 루트의 `.claude-plugin/marketplace.json`이 여덟 mod를 한 마켓플레이스로 묶습니다.
 
 ```
 <mod>/

@@ -1,0 +1,7 @@
+{
+  "name": "agent-router-macos",
+  "version": "0.1.0",
+  "author": { "name": "akaz01" },
+  "description": "Routes subagents to haiku, sonnet or opus by type rules and task level (L1-L3), enforces concurrency limits, and hints a model for the main thread.",
+  "types": "./types/index.d.ts"
+}

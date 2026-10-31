@@ -5,6 +5,10 @@
     { "name": "work-board", "source": "./work-board" },
     { "name": "agent-router", "source": "./agent-router" },
     { "name": "collab-hub", "source": "./collab-hub" },
-    { "name": "safe-shell", "source": "./safe-shell" }
+    { "name": "safe-shell", "source": "./safe-shell" },
+    { "name": "work-board-macos", "source": "./macos/work-board" },
+    { "name": "agent-router-macos", "source": "./macos/agent-router" },
+    { "name": "collab-hub-macos", "source": "./macos/collab-hub" },
+    { "name": "safe-shell-macos", "source": "./macos/safe-shell" }
   ]
 }
