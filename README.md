@@ -68,7 +68,33 @@ Bash와 PowerShell 명령을 실행 전에 검사하는 3단계 guard입니다.
 
 ## 설치
 
-다른 컴퓨터에서는 Claude Code 터미널 세션의 입력창에 아래 줄을 하나씩 입력합니다. work-board는 나머지 세 mod를 함께 쓰므로 네 개를 모두 설치합니다.
+work-board는 나머지 세 mod를 함께 쓰므로 네 개를 모두 설치합니다. 설치한 뒤 새로 여는 Claude 세션부터 켜집니다.
+
+### 준비
+
+이 저장소는 비공개입니다. 설치할 컴퓨터에서 이 저장소에 접근할 수 있는 GitHub 계정으로 먼저 로그인합니다.
+
+```
+gh auth login
+```
+
+### 방법 1. 터미널 명령 (추천)
+
+PowerShell이나 터미널에서 아래 줄을 차례로 실행합니다. `--scope user`는 모든 폴더에서 쓰는 설치입니다.
+
+```
+claude plugin marketplace add akaz01/pixel-mods
+claude plugin install work-board@pixel-mods --scope user
+claude plugin install agent-router@pixel-mods --scope user
+claude plugin install collab-hub@pixel-mods --scope user
+claude plugin install safe-shell@pixel-mods --scope user
+```
+
+설치가 됐는지는 `claude plugin list`로 확인합니다. 네 mod가 `@pixel-mods`, `Scope: user`로 보이면 됩니다.
+
+### 방법 2. Claude Code 입력창
+
+Claude Code 터미널 세션의 입력창에 아래 줄을 하나씩 입력합니다.
 
 ```
 /plugin install work-board --marketplace akaz01/pixel-mods
@@ -78,8 +104,32 @@ Bash와 PowerShell 명령을 실행 전에 검사하는 3단계 guard입니다.
 ```
 
 - 처음 한 번은 마켓플레이스를 추가할지 묻습니다. `y`를 누르고 설치 범위(scope)를 고릅니다. 모든 폴더에서 쓰려면 user를 고릅니다.
-- 이 저장소는 비공개입니다. 설치할 컴퓨터에서 저장소에 접근할 수 있는 GitHub 계정으로 먼저 로그인해야 합니다(`gh auth login`).
 - 데스크톱 앱의 Code 탭에서는 이 명령을 쓸 수 없습니다. 터미널에서 user 범위로 설치하면 데스크톱 앱에서도 켜집니다.
+
+### 업데이트
+
+저장소에 새 버전이 올라오면 각 컴퓨터에서 마켓플레이스를 새로 받은 뒤 mod를 업데이트합니다. 바뀐 mod만 업데이트해도 됩니다.
+
+```
+claude plugin marketplace update pixel-mods
+claude plugin update work-board@pixel-mods
+claude plugin update agent-router@pixel-mods
+claude plugin update collab-hub@pixel-mods
+claude plugin update safe-shell@pixel-mods
+```
+
+업데이트가 잡히지 않으면 해당 mod의 `.claude-plugin/plugin.json`에서 `version`을 올려 다시 올립니다.
+
+### 지우기
+
+```
+claude plugin uninstall work-board@pixel-mods
+claude plugin uninstall agent-router@pixel-mods
+claude plugin uninstall collab-hub@pixel-mods
+claude plugin uninstall safe-shell@pixel-mods
+claude plugin marketplace remove pixel-mods
+```
+
 ## Folder layout
 
 각 mod는 저장소 루트의 `<mod>/` 폴더이고, 루트의 `.claude-plugin/marketplace.json`이 네 mod를 마켓플레이스로 묶습니다.
