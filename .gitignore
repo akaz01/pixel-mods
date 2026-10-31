@@ -4,3 +4,6 @@
 # Engine-generated type files inside each mod, rewritten on every load.
 */.claude-plugin/types/
 node_modules/
+
+# The same engine-generated types for the macOS mods, one folder deeper.
+macos/*/.claude-plugin/types/

@@ -1,0 +1,7 @@
+{
+  "name": "collab-hub-macos",
+  "version": "0.1.0",
+  "author": { "name": "akaz01" },
+  "description": "Same-PC session board: heartbeats, file claims with edit guard, notices, and [hub] message threads between sessions.",
+  "types": "./types/index.d.ts"
+}
