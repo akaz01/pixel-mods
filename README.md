@@ -6,7 +6,7 @@ Claude Code용 mod 네 개를 모아 둔 비공개 저장소입니다. 픽셀 �
 
 ### work-board
 
-화면 오른쪽에 붙는 pixel board pane입니다. 맨 위에 노란 title band가 있습니다.
+화면 오른쪽에 붙는 pixel board pane입니다. 맨 위에 노란 title band가 있습니다. 세션을 열면 자동으로 열리고, `/board close`로 닫아 두면 다음 세션부터는 열리지 않습니다.
 
 - hero row: 왼쪽 text column(ANTHROPIC CLAUDE / MODEL / plan badge / WEEK, 5HR limits), 픽셀 Claude sprite, 현재 상태를 말하는 pixel speech bubble. 상태 단어는 THINKING, CODING, RUNNING, TESTING, WRAPPING, DONE, READY, SLEEPING 등입니다.
 - Ultra처럼 5시간 limit이 없는 plan에서는 5HR 줄 대신 week gauge를 보여 줍니다.
@@ -68,7 +68,13 @@ Bash와 PowerShell 명령을 실행 전에 검사하는 3단계 guard입니다.
 
 ## 설치
 
-work-board는 나머지 세 mod를 함께 쓰므로 네 개를 모두 설치합니다. 설치한 뒤 새로 여는 Claude 세션부터 켜집니다.
+work-board는 나머지 세 mod를 함께 쓰므로 네 개를 모두 설치합니다.
+
+설치한 뒤에는 따로 켤 필요가 없습니다. 새로 여는 Claude 세션마다 네 mod가 자동으로 켜지고, Work Board 창도 자동으로 열립니다.
+
+- 보드를 `/board close`로 닫으면, 다음 세션부터는 보드가 자동으로 열리지 않습니다. mod 자체는 계속 켜져 있습니다.
+- 다시 `/board`로 열면, 그다음 세션부터 다시 자동으로 열립니다.
+- mod를 잠시 끄려면 `claude plugin disable <mod>@pixel-mods`, 다시 켜려면 `claude plugin enable <mod>@pixel-mods`를 씁니다.
 
 ### 준비
 

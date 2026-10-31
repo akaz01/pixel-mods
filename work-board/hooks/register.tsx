@@ -296,7 +296,8 @@ export const register: Register = on => {
     $.clock.every(RAM_POLL_MS, () => void quietly($, 'memory read', () => refreshRam($)))
     const started = await next(e)
     // Also after a hot reload, which closes the pane: reopen shortly once the session is drawn.
-    if (autoOpen === true && e.isInteractive !== false) {
+    // Open on every session start unless the person closed it last time with /board close; a new machine opens it too.
+    if (autoOpen !== false && e.isInteractive !== false) {
       $.clock.after(REOPEN_DELAY_MS, () => void quietly($, 'reopen', () => openBoard($)))
     }
     return started
