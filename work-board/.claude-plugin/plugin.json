@@ -1,6 +1,6 @@
 {
   "name": "work-board",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": { "name": "akaz01" },
   "description": "Pixel RPG work board docked on the right: limits and context, running agents and models, skills and plugins, routing, collaboration, a timeline of requests and tool steps, files touched, and weekly/5h usage.",
   "types": "./types/index.d.ts",

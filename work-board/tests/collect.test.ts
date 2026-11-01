@@ -64,6 +64,17 @@ test('planOf reads the display name and the max tier', () => {
   expect(planOf(undefined)).toBeUndefined()
 })
 
+test('planOf finds the plan without a display name', () => {
+  expect(planOf({ organizationType: 'claude_pro', organizationRateLimitTier: 'default_claude_ai' })).toEqual({ name: 'pro', tier: undefined })
+  expect(planOf({ organizationType: 'claude_max', organizationRateLimitTier: 'default_claude_max_20x' })).toEqual({ name: 'max', tier: 'max 20x' })
+  expect(planOf({ organizationType: 'claude_team', seatTier: 'premium' })).toEqual({ name: 'team', tier: 'premium' })
+  expect(planOf({ organizationType: 'claude_enterprise' })).toEqual({ name: 'enterprise', tier: undefined })
+  // A user tier that names no plan does not hide the organization's max tier.
+  expect(planOf({ userRateLimitTier: 'default_claude_ai', organizationRateLimitTier: 'default_claude_max_5x' })).toEqual({ name: 'max 5x', tier: undefined })
+  expect(planOf({ planDisplayName: '  ', organizationType: 'claude_max', userRateLimitTier: 'default_claude_max_5x' })).toEqual({ name: 'max', tier: 'max 5x' })
+  expect(planOf({})).toBeUndefined()
+})
+
 test('stepTarget names what a step acted on', () => {
   expect(stepTarget('Edit', { file_path: 'C:\\mods\\view.tsx' })).toBe('view.tsx')
   expect(stepTarget('Bash', { command: 'claude plugin test . --verbose' })).toBe('claude plugin test')

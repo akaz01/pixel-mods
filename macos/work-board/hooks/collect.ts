@@ -91,14 +91,18 @@ export const minutesToFull = (pct: number, ratePerMin: number | undefined): numb
   ratePerMin && ratePerMin > 0 && pct < 100 ? Math.round((100 - pct) / ratePerMin) : undefined
 
 // Reads the plan from the account block of ~/.claude.json (never the credentials file).
+// Accounts differ in what they carry: a display name, an organization type (claude_pro, claude_max, claude_team,
+// claude_enterprise), rate-limit tiers on the user or the organization, a seat tier. Any one of them names the plan.
 export const planOf = (account: unknown): { name: string; tier?: string } | undefined => {
   if (!account || typeof account !== 'object') return undefined
   const a = account as Record<string, unknown>
-  const rawTier = [a.userRateLimitTier, a.organizationRateLimitTier].find(t => typeof t === 'string') as string | undefined
-  const max = rawTier ? /max_(\d+)x/i.exec(rawTier) : null
-  const tier = max ? `max ${max[1]}x` : rawTier && /pro/i.test(rawTier) ? 'pro' : undefined
-  const name = typeof a.planDisplayName === 'string' && a.planDisplayName ? a.planDisplayName : tier
-  return name ? { name, tier: tier !== name ? tier : undefined } : undefined
+  const text = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : undefined)
+  const rawTiers = [a.userRateLimitTier, a.organizationRateLimitTier].map(text).filter((t): t is string => !!t)
+  const max = rawTiers.map(t => /max_(\d+)x/i.exec(t)).find(Boolean)
+  const orgType = text(a.organizationType)?.replace(/^claude_/i, '').replace(/_/g, ' ')
+  const tier = max ? `max ${max[1]}x` : text(a.seatTier) ?? (rawTiers.some(t => /pro/i.test(t)) ? 'pro' : undefined)
+  const name = text(a.planDisplayName) ?? orgType ?? tier
+  return name ? { name, tier: tier && tier !== name ? tier : undefined } : undefined
 }
 
 // What a step acted on, in a few characters: a file name, the start of a command, a pattern.

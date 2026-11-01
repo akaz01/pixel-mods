@@ -124,12 +124,22 @@ const refreshRam = async ($: EngineInterface) => {
   if (found) await update($, ram, () => found)
 }
 
+// The account block sits in .claude.json under CLAUDE_CONFIG_DIR when that is set, else in the home folder.
+// The engine rewrites the file often, so a read can land mid-write; a failed read keeps the plan already found,
+// and the usage poll reads again, which also catches a /login made after the session began.
 const readPlan = async ($: EngineInterface) => {
-  const home = (await $.env.get('HOME')) ?? ''
-  if (!home) return
-  const text = await $.fs.read(`${home}/.claude.json`)
-  const found = planOf((JSON.parse(String(text)) as { oauthAccount?: unknown }).oauthAccount)
-  await update($, plan, () => found ?? null)
+  const trim = (p: string | undefined) => p?.replace(/\/+$/, '') || undefined
+  const configDir = trim(await $.env.get('CLAUDE_CONFIG_DIR'))
+  const home = trim(await $.env.get('HOME'))
+  const paths = [configDir && `${configDir}/.claude.json`, home && `${home}/.claude.json`].filter((p): p is string => !!p)
+  for (const path of paths) {
+    const text = await $.fs.read(path).catch(() => undefined)
+    if (text === undefined) continue
+    let account: unknown
+    try { account = (JSON.parse(String(text)) as { oauthAccount?: unknown }).oauthAccount } catch { continue }
+    const found = planOf(account)
+    if (found) return void (await update($, plan, () => found))
+  }
 }
 
 const openBoard = async ($: EngineInterface) => {
@@ -286,7 +296,10 @@ export const register: Register = on => {
     if (Array.isArray(history)) await update($, usage, u => ({ ...u, history: history.filter(isDayPct) }))
     await quietly($, 'usage read', () => refreshUsage($))
     $.clock.every(AGENT_POLL_MS, () => void quietly($, 'agent list', () => refreshAgents($)))
-    $.clock.every(USAGE_POLL_MS, () => void quietly($, 'usage read', () => refreshUsage($)))
+    $.clock.every(USAGE_POLL_MS, () => {
+      void quietly($, 'usage read', () => refreshUsage($))
+      void quietly($, 'plan read', () => readPlan($))
+    })
     $.clock.every(RAM_POLL_MS, () => void quietly($, 'memory read', () => refreshRam($)))
     const started = await next(e)
     // Also after a hot reload, which closes the pane: reopen shortly once the session is drawn.
