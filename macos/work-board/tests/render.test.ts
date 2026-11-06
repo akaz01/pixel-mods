@@ -1,5 +1,5 @@
 import { expect, test } from 'claude-code/testing'
-import { barColorOf, bubbleParts, EDGE_MARGIN, contentColumns, hasFiveLimit, LEGS, TAIL_CELLS, WING_CELLS, modelName, phaseOf, pixelRuns, restWord, SPRITE, stateRoom } from '../hooks/view'
+import { barColorOf, bubbleParts, EDGE_MARGIN, contentColumns, hasFiveLimit, LEGS, TAIL_CELLS, WING_CELLS, modelName, peerName, phaseOf, pixelRuns, restWord, SPRITE, stateRoom } from '../hooks/view'
 
 const PANE_PROPS = {
   title: 'Work Board',
@@ -108,4 +108,28 @@ test('every file bar has a colour: new green, edited orange, read only cyan', ()
 test('the board keeps a margin off the pane\'s right edge and lays out in the width left', () => {
   expect(EDGE_MARGIN).toBe(2)
   expect(contentColumns(68)).toBe(66)
+})
+
+type Drawn = { type: string; props?: Record<string, unknown>; children?: (Drawn | string)[] }
+const shownText = (node: Drawn | string): string => (typeof node === 'string' ? node : (node.children ?? []).map(shownText).join(''))
+const elements = (node: Drawn): Drawn[] => (node.children ?? []).filter((k): k is Drawn => typeof k !== 'string')
+const findRow = (node: Drawn, label: RegExp): Drawn | undefined => {
+  const kids = elements(node)
+  const isRow = kids.length === 2 && kids.every(k => k.type === 'Box') && label.test(shownText(kids[0] as Drawn))
+  return isRow ? node : kids.map(k => findRow(k, label)).find(Boolean)
+}
+
+test('the MAIN state word keeps its width and a long tool name gives way', async $ => {
+  const ui = await $.ui.mount({ plugin: 'work-board-macos', surface: 'terminal', component: 'Pane', requestId: 'work-board-macos', props: PANE_PROPS } as never)
+  const mainRow = findRow(await ui.drawn() as unknown as Drawn, /^· IDLE$/)
+  const [state, tool] = mainRow ? elements(mainRow) : []
+  expect(state?.props?.flexShrink).toBe(0)
+  expect(tool?.props?.flexShrink).toBe(1)
+  expect(tool && elements(tool)[0]?.props?.wrap).toBe('truncate-end')
+  await ui.unmount()
+})
+
+test('a session name stays short enough to keep its row on one line', () => {
+  expect(peerName('main')).toBe('MAIN')
+  expect(peerName('a-session-name-far-longer-than-the-row-allows').length).toBeLessThanOrEqual(20)
 })

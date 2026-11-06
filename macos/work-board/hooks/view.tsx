@@ -68,6 +68,15 @@ const row = (el: El, left: RenderChildren, right: RenderChildren) => (
   <el.Box width="100%" justifyContent="space-between" overflow="hidden"><el.Box flexShrink={1} overflow="hidden">{left}</el.Box><el.Box flexShrink={0} paddingLeft={1}>{right}</el.Box></el.Box>
 )
 
+// The other way round: a short label on the left stays whole and a detail of any length on the right gives way.
+const pinnedRow = (el: El, left: RenderChildren, right: RenderChildren) => (
+  <el.Box width="100%" justifyContent="space-between" overflow="hidden"><el.Box flexShrink={0}>{left}</el.Box><el.Box flexShrink={1} paddingLeft={1} overflow="hidden">{right}</el.Box></el.Box>
+)
+
+// A session's name is such a left label, cut so it can never fill the row by itself.
+const PEER_NAME_ROOM = 20
+export const peerName = (name: string) => up(short(name, PEER_NAME_ROOM))
+
 // An RPG window: a rounded border in its colour, the title as its first line. Rounded single lines are the border
 // that SF Mono in Terminal.app draws best (double lines break into dashes). It hides what runs past its width, so a
 // row never spills over the pane's edge and leaves cells behind.
@@ -551,16 +560,16 @@ const running = (el: El, d: BoardData) => {
   const peers = (d.hub?.peers ?? []).filter(p => !p.isEnded && d.now - p.beat < PEER_LIVE_MS)
   const sessions = peers.map(p => {
     const asks = threads.filter(t => !t.isMine && t.type === 'QUESTION' && p.name.startsWith(t.peer.split('@')[0] ?? t.peer)).length
-    return row(el,
-      <el.Text><el.Text color={P.green}>● </el.Text>{up(p.name)}{me && p.id === me.id ? <el.Text color={P.dim}> (YOU)</el.Text> : null}</el.Text>,
-      asks ? <el.Text color={P.yellow}>? {asks} QUESTION</el.Text> : <el.Text color={P.dim}>{p.claims.length ? `CLAIM ${up(p.claims[0]?.split('/').pop() ?? '')}` : ''}</el.Text>)
+    return pinnedRow(el,
+      <el.Text><el.Text color={P.green}>● </el.Text>{peerName(p.name)}{me && p.id === me.id ? <el.Text color={P.dim}> (YOU)</el.Text> : null}</el.Text>,
+      asks ? <el.Text color={P.yellow} wrap="truncate-end">? {asks} QUESTION</el.Text> : <el.Text color={P.dim} wrap="truncate-end">{p.claims.length ? `CLAIM ${up(p.claims[0]?.split('/').pop() ?? '')}` : ''}</el.Text>)
   })
   const usedRows = headRows(d) + winRows(1) + winRows(party.length) + winRows(skills.length) + (d.hub ? winRows(sessions.length) : 0)
   const fit = fitLists(d, usedRows)
   return [
-    win(el, 'MAIN', up(tierOf(d.main.model) ?? '—'), [row(el,
+    win(el, 'MAIN', up(tierOf(d.main.model) ?? '—'), [pinnedRow(el,
       d.main.status === 'working' ? <el.Text color={P.yellow}>▶ WORKING</el.Text> : <el.Text color={P.dim}>· IDLE</el.Text>,
-      <el.Text color={P.dim}>{d.main.tool ? `TOOL: ${up(d.main.tool)}` : ''}</el.Text>)]),
+      <el.Text color={P.dim} wrap="truncate-end">{d.main.tool ? `TOOL: ${up(d.main.tool)}` : ''}</el.Text>)]),
     win(el, 'PARTY', <el.Text>{live.length}/{limit} {slots(el, live.length, limit, P.white)}</el.Text>, party),
     win(el, 'SKILLS & PLUGINS', String(d.skills.length), skills),
     ...(d.hub ? [win(el, 'SESSIONS', `${peers.length} LINKED`, sessions)] : []),
@@ -606,8 +615,8 @@ const collab = (el: El, d: BoardData) => {
   const all = (hub.peers ?? []).filter(p => !p.isEnded && d.now - p.beat < 24 * 3600_000)
   const board = all.map(p => {
     const isLive = d.now - p.beat < PEER_LIVE_MS
-    return row(el,
-      <el.Text><el.Text color={isLive ? P.green : P.dim}>{isLive ? '●' : '○'} </el.Text><el.Text color={isLive ? P.white : P.dim}>{up(p.name)}</el.Text><el.Text color={P.dim}> {up(duration(d.now - p.beat))}</el.Text></el.Text>,
+    return pinnedRow(el,
+      <el.Text><el.Text color={isLive ? P.green : P.dim}>{isLive ? '●' : '○'} </el.Text><el.Text color={isLive ? P.white : P.dim}>{peerName(p.name)}</el.Text><el.Text color={P.dim}> {up(duration(d.now - p.beat))}</el.Text></el.Text>,
       <el.Text color={P.dim} wrap="truncate-end">{p.claims.length ? `CLAIM ${up(p.claims.map(c => c.split('/').pop()).join(', '))}` : isLive ? '' : 'NO SIGNAL'}</el.Text>)
   })
   const threads = (hub.threads ?? []).slice(-4).map(t => row(el,
