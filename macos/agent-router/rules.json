@@ -7,8 +7,8 @@
     "ecc:planner": { "best": "opus", "min": "sonnet" },
     "security-reviewer": "opus",
     "ecc:security-reviewer": "opus",
-    "code-reviewer": "sonnet",
-    "ecc:code-reviewer": "sonnet",
+    "code-reviewer": { "best": "opus", "min": "sonnet" },
+    "ecc:code-reviewer": { "best": "opus", "min": "sonnet" },
     "tdd-guide": "sonnet",
     "ecc:tdd-guide": "sonnet",
     "Explore": "haiku"

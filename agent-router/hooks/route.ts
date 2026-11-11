@@ -1,7 +1,7 @@
 import type { Level, Limits, Source, Tier } from '../types'
 
 // What a role asks of a model: best is the model whose strengths fit the work, min the weakest one that can still
-// do it well. Deep multi-step judgement is fable's, planning and hard analysis opus's, writing and reviewing code
+// do it well. Deep multi-step judgement is fable's, planning, hard analysis and reviewing code opus's, writing code
 // sonnet's, fast lookups haiku's.
 export type Role = { best: Tier; min: Tier }
 
@@ -21,6 +21,8 @@ export const LEVEL_ROLE: Record<Level, Role> = { 1: only('haiku'), 2: only('sonn
 
 const DESIGN: Role = { best: 'fable', min: 'opus' }
 const PLANNING: Role = { best: 'opus', min: 'sonnet' }
+// The reviewer should not be weaker than the model that wrote the code; sonnet can still review when it must.
+const CODE_REVIEW: Role = { best: 'opus', min: 'sonnet' }
 
 export const DEFAULT_RULES: Rules = {
   types: {
@@ -30,8 +32,8 @@ export const DEFAULT_RULES: Rules = {
     'ecc:planner': PLANNING,
     'security-reviewer': only('opus'),
     'ecc:security-reviewer': only('opus'),
-    'code-reviewer': only('sonnet'),
-    'ecc:code-reviewer': only('sonnet'),
+    'code-reviewer': CODE_REVIEW,
+    'ecc:code-reviewer': CODE_REVIEW,
     'tdd-guide': only('sonnet'),
     'ecc:tdd-guide': only('sonnet'),
     Explore: only('haiku'),

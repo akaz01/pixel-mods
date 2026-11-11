@@ -54,7 +54,8 @@ describe('decide', () => {
   test('the most important role goes to the strongest model', async () => {
     expect(decide(spawn('architect', 'x'), DEFAULT_RULES, { level: true }).tier).toBe('fable')
     expect(decide(spawn('planner', 'x'), DEFAULT_RULES, { level: true }).tier).toBe('opus')
-    expect(decide(spawn('code-reviewer', 'x'), DEFAULT_RULES, { level: true }).tier).toBe('sonnet')
+    expect(decide(spawn('code-reviewer', 'x'), DEFAULT_RULES, { level: true }).tier).toBe('opus')
+    expect(decide(spawn('tdd-guide', 'x'), DEFAULT_RULES, { level: true }).tier).toBe('sonnet')
     expect(decide(spawn('Explore', 'x'), DEFAULT_RULES, { level: true }).tier).toBe('haiku')
   })
 
