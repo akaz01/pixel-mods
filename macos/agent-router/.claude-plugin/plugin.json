@@ -1,6 +1,6 @@
 {
   "name": "agent-router-macos",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": { "name": "akaz01" },
   "description": "Routes subagents to fable, opus, sonnet or haiku by type rules and task level (L1-L3), the strongest model present taking the most important role, enforces concurrency limits, and hints a model for the main thread.",
   "types": "./types/index.d.ts"
