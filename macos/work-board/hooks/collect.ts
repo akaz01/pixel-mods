@@ -23,8 +23,13 @@ export const pluginOfTool = (tool: string): string | undefined => {
   return server.startsWith('plugin_') ? (server.slice(7).split('_')[0] ?? server) : server
 }
 
-export const tierOf = (model: string | undefined): string | undefined =>
-  model ? ['opus', 'sonnet', 'haiku'].find(tier => model.toLowerCase().includes(tier)) ?? model.replace(/^claude-/, '') : undefined
+// The model's family word. A family this list does not know yet is read off the id itself, without its version:
+// claude-fable-5-2[1m] is fable, never fable-5-2.
+export const tierOf = (model: string | undefined): string | undefined => {
+  if (!model) return undefined
+  const id = model.toLowerCase()
+  return ['fable', 'opus', 'sonnet', 'haiku'].find(tier => id.includes(tier)) ?? id.replace(/\[.*\]$/, '').replace(/^claude-/, '').replace(/-\d.*$/, '')
+}
 
 export const bar = (pct: number, cells: number): { on: string; off: string } => {
   const filled = Math.max(0, Math.min(cells, Math.round((pct * cells) / 100)))

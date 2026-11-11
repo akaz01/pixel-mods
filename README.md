@@ -107,7 +107,10 @@ Mac:
 
 subagent를 만들 때 모델을 정해 주는 mod입니다.
 
-- type별 규칙(`rules.json`)과 작업 level(L1-L3)로 haiku, sonnet, opus 중 하나를 고릅니다. fork와 workflow는 건드리지 않습니다.
+- type별 규칙(`rules.json`)과 작업 level(L1-L3)로 fable, opus, sonnet, haiku 중 하나를 고릅니다. fork와 workflow는 건드리지 않습니다.
+- 역할은 모델의 능력에 맞춰 나눕니다. 여러 단계를 깊이 따지는 설계는 fable, 계획과 어려운 분석·보안 검토는 opus, 코드 작성과 검토는 sonnet, 빠른 찾기는 haiku가 맡습니다.
+- 규칙마다 가장 잘 맞는 모델(`best`)과 그 일을 해낼 수 있는 가장 낮은 모델(`min`)을 적습니다. 모델 이름만 적으면 둘이 같습니다. 기본값: architect는 fable(min opus), planner는 opus(min sonnet), security-reviewer와 L3는 opus, code-reviewer·tdd-guide와 L2는 sonnet, Explore와 L1은 haiku.
+- `rules.json`의 `top`에 쓸 수 있는 가장 위 모델을 적습니다(기본 `fable`). fable을 못 쓰면 `"top": "opus"`로 바꿉니다. 그러면 opus가 architect를 맡고, 자기 일 중 sonnet도 해낼 수 있는 planner만 sonnet에 넘깁니다. `min`보다 아래로는 내려가지 않으므로 code-reviewer는 sonnet에 그대로 남습니다. `/routing rules`가 지금 배분을 보여 줍니다.
 - 동시 실행 한도(기본 concurrent 4, background 2)를 넘으면 spawn을 막습니다. 한도는 routing이 꺼져 있어도 적용됩니다.
 - 메인 스레드에는 모델을 바꾸지 않고 `/model` 힌트만 toast로 알려 줍니다.
 

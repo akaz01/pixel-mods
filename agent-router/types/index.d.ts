@@ -1,4 +1,4 @@
-export type Tier = 'haiku' | 'sonnet' | 'opus'
+export type Tier = 'haiku' | 'sonnet' | 'opus' | 'fable'
 
 export type Level = 1 | 2 | 3
 

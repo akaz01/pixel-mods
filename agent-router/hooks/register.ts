@@ -1,8 +1,8 @@
 import { atom, read, update } from 'claude-code'
 import type { AgentSpawnInput, EngineInterface, Register } from 'claude-code'
 
-import { DEFAULT_RULES, decide, hintFor, LEVEL_TIER, mergeRules, tierOf } from './route'
-import type { Rules } from './route'
+import { DEFAULT_RULES, decide, hintFor, LEVEL_ROLE, mergeRules, modelFor, tierOf, TIERS } from './route'
+import type { Role, Rules } from './route'
 import type { Decision, Hint, Switches, Tier } from '../types'
 
 const MAX_DECISIONS = 40
@@ -96,7 +96,7 @@ const listText = async ($: EngineInterface): Promise<string> => {
   const routed = list.filter(d => d.source !== 'blocked')
   const byTier = (tier: Tier) => routed.filter(d => (d.tier ?? tierOf(d.model)) === tier).length
   const head = `agent-router · routing ${on.isRouting ? 'on' : 'off'} · level ${on.isLevel ? 'on' : 'off'} · hints ${on.isHints ? 'on' : 'off'} · limit ${rules.limits.concurrent} (bg ${rules.limits.background})`
-  const counts = `opus ${byTier('opus')} · sonnet ${byTier('sonnet')} · haiku ${byTier('haiku')} · blocked ${list.length - routed.length}`
+  const counts = `${TIERS.map(tier => `${tier} ${byTier(tier)}`).join(' · ')} · blocked ${list.length - routed.length}`
   const rows = list.slice(-12).map(d => {
     const lv = d.level ? `L${d.level}` : '—'
     const model = d.source === 'blocked' ? 'blocked' : (d.tier ?? tierOf(d.model) ?? d.model ?? 'own')
@@ -121,9 +121,18 @@ const runCommand = async ($: EngineInterface, args: string): Promise<string> => 
   }
   if (first === 'rules') {
     await loadRules($)
-    const types = Object.entries(rules.types).map(([type, tier]) => `  ${type.padEnd(20)} ${tier}`)
-    const fallback = `  (other types)        L1 ${LEVEL_TIER[1]} · L2 ${LEVEL_TIER[2]} · L3 ${LEVEL_TIER[3]}`
-    return [`agent-router rules · ${$.plugin.root}/rules.json (reloaded)`, ...types, fallback].join('\n')
+    // Each role's model among the ones present; its best fit is named beside it when a missing model moved it.
+    const seated = (role: Role) => {
+      const tier = modelFor(role, rules.models)
+      return tier === role.best ? tier : `${tier} (for ${role.best})`
+    }
+    const absent = TIERS.filter(tier => !rules.models.includes(tier))
+    const models = `  models                 ${rules.models.join(' > ')}${absent.length ? ` · absent ${absent.join(', ')}` : ''}`
+    const types = Object.entries(rules.types)
+      .sort(([, a], [, b]) => TIERS.indexOf(a.best) - TIERS.indexOf(b.best))
+      .map(([type, role]) => `  ${type.padEnd(22)} ${seated(role)}`)
+    const fallback = `  (other types)          L1 ${seated(LEVEL_ROLE[1])} · L2 ${seated(LEVEL_ROLE[2])} · L3 ${seated(LEVEL_ROLE[3])}`
+    return [`agent-router rules · ${$.plugin.root}/rules.json (reloaded)`, models, ...types, fallback].join('\n')
   }
   return USAGE
 }
@@ -146,7 +155,7 @@ export const register: Register = on => {
   // Main thread: suggest only. The session model is never switched here.
   on('prompt.submit', async ($, e, next) => {
     if (e.origin.kind !== 'composer' || e.text.startsWith('/') || !(await read($, switches)).isHints) return next(e)
-    const hint = hintFor(e.text, await $.session.model())
+    const hint = hintFor(e.text, await $.session.model(), rules.models)
     if (hint) {
       $.ui.toast(`agent-router · hint: looks like a ${hint.tier} task (${hint.why}) · /model ${hint.tier}`)
       await update($, hints, list => [...list, { at: Date.now(), tier: hint.tier, why: hint.why, isFollowed: false }].slice(-MAX_HINTS))

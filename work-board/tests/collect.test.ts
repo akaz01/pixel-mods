@@ -23,6 +23,7 @@ describe('collect', () => {
 
   test('tierOf shortens model ids', async () => {
     expect(tierOf('claude-opus-5-5')).toBe('opus')
+    expect(tierOf('claude-fable-5-2')).toBe('fable')
     expect(tierOf('haiku')).toBe('haiku')
   })
 
