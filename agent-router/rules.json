@@ -1,14 +1,17 @@
 {
+  "top": "fable",
   "types": {
-    "Explore": "haiku",
+    "architect": { "best": "fable", "min": "opus" },
+    "ecc:architect": { "best": "fable", "min": "opus" },
+    "planner": { "best": "opus", "min": "sonnet" },
+    "ecc:planner": { "best": "opus", "min": "sonnet" },
+    "security-reviewer": "opus",
+    "ecc:security-reviewer": "opus",
     "code-reviewer": "sonnet",
     "ecc:code-reviewer": "sonnet",
     "tdd-guide": "sonnet",
     "ecc:tdd-guide": "sonnet",
-    "architect": "opus",
-    "ecc:architect": "opus",
-    "planner": "opus",
-    "ecc:planner": "opus"
+    "Explore": "haiku"
   },
   "limits": { "concurrent": 4, "background": 2 }
 }

@@ -51,7 +51,7 @@ const P = {
   cyan: '#3cbcfc', purple: '#b8b8f8', orange: '#fca044', black: '#000000', soft: '#bcbcbc',
   clay: '#d97757', empty: '#3a3a3a', term: '#0c0c0c',
 }
-const MODEL: Record<string, string> = { opus: P.purple, sonnet: P.yellow, haiku: P.cyan }
+const MODEL: Record<string, string> = { fable: P.orange, opus: P.purple, sonnet: P.yellow, haiku: P.cyan }
 const LEVEL: Record<number, string> = { 1: P.cyan, 2: P.yellow, 3: P.red }
 const TABS = ['RUNNING', 'ROUTING', 'COLLAB', 'TIMELINE', 'USAGE'] as const
 export const HELP_TAB = 6
@@ -149,7 +149,7 @@ const statusWin = (el: El, d: BoardData) => {
   const ctx = d.usage.context
   const cells = gaugeCells(d)
   const live = d.agents.filter(a => LIVE.has(a.status))
-  const tiers = ['opus', 'sonnet', 'haiku'].filter(t => live.some(a => tierOf(a.model) === t))
+  const tiers = ['fable', 'opus', 'sonnet', 'haiku'].filter(t => live.some(a => tierOf(a.model) === t))
   const peers = (d.hub?.peers ?? []).filter(p => !p.isEnded && d.now - p.beat < PEER_LIVE_MS).length
   const sep = <el.Text color={P.dim}> │ </el.Text>
   // RAM on top, context under it with its compact button, the party last. The limits sit by the hero.

@@ -66,6 +66,8 @@ test('the model line names the main model with its version', () => {
   expect(modelName('claude-opus-5-5')).toBe('OPUS 5.5')
   expect(modelName('claude-sonnet-4-5-20250929')).toBe('SONNET 4.5')
   expect(modelName('claude-haiku-5-5[1m]')).toBe('HAIKU 5.5')
+  expect(modelName('claude-fable-5-2')).toBe('FABLE 5.2')
+  expect(modelName('claude-mythos-5-2[1m]')).toBe('MYTHOS 5.2')
   expect(modelName(undefined)).toBe('—')
 })
 
