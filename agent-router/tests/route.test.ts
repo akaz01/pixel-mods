@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'claude-code/testing'
 
-import { DEFAULT_RULES, decide, hintFor, mergeRules, modelFor, scoreLevel } from '../hooks/route'
+import { briefFor, DEFAULT_RULES, decide, FABLE_BRIEF, hintFor, mergeRules, modelFor, scoreLevel, TIERS } from '../hooks/route'
 
 const spawn = (subagentType: string, text: string, model?: string) => ({ subagentType, description: '', prompt: text, model })
 
@@ -110,7 +110,7 @@ describe('hintFor', () => {
   })
 
   test('stays quiet when the model already fits', async () => {
-    expect(hintFor('구조 설계를 다시 짜 줘', 'claude-opus-5-5')).toBeUndefined()
+    expect(hintFor('여러 파일에 걸친 마이그레이션', 'claude-opus-5-5')).toBeUndefined()
     expect(hintFor('버그 수정', 'claude-sonnet-5-5')).toBeUndefined()
   })
 
@@ -128,5 +128,44 @@ describe('hintFor', () => {
 
   test('suggests a lighter model for light work on opus', async () => {
     expect(hintFor('파일 이름 찾기', 'claude-opus-5-5')?.tier).toBe('haiku')
+  })
+
+  test('suggests fable for architecture, root cause and outage work on opus', async () => {
+    expect(hintFor('구조 설계를 다시 짜 줘', 'claude-opus-5-5')?.tier).toBe('fable')
+    expect(hintFor('로그인 장애 근본 원인 찾아 줘', 'claude-opus-5-5')?.tier).toBe('fable')
+    expect(hintFor('find the root cause of the outage', 'claude-opus-5-5')?.tier).toBe('fable')
+  })
+
+  test('does not suggest fable when the account has none', async () => {
+    expect(hintFor('결제 모듈 아키텍처 결정', 'claude-opus-5-5', ['opus', 'sonnet', 'haiku'])).toBeUndefined()
+  })
+
+  test('suggests opus for ordinary edits on fable', async () => {
+    expect(hintFor('로그인 버그 수정하고 테스트 추가해 줘', 'claude-fable-5-2')?.tier).toBe('opus')
+    expect(hintFor('implement the parser', 'claude-fable-5-2')?.tier).toBe('opus')
+  })
+
+  test('stays on fable for fable work, heavy work and prompts with no signal', async () => {
+    expect(hintFor('장애 원인 고쳐 줘', 'claude-fable-5-2')).toBeUndefined()
+    expect(hintFor('여러 파일에 걸친 마이그레이션', 'claude-fable-5-2')).toBeUndefined()
+    expect(hintFor('hello', 'claude-fable-5-2')).toBeUndefined()
+  })
+
+  test('sonnet still steps up one model at a time for heavy work', async () => {
+    expect(hintFor('결제 모듈 아키텍처 결정', 'claude-sonnet-5-5')?.tier).toBe('opus')
+  })
+})
+
+describe('briefFor', () => {
+  test('a thread below fable that can start agents is told when to hand work to fable', async () => {
+    expect(briefFor('claude-opus-5-5', ['Agent', 'Read'], TIERS)).toBe(FABLE_BRIEF)
+    expect(briefFor('claude-sonnet-5-5', ['Agent'], TIERS)).toBe(FABLE_BRIEF)
+    expect(FABLE_BRIEF.text).toContain('model: "fable"')
+  })
+
+  test('no brief on fable, without the Agent tool, or on an account without fable', async () => {
+    expect(briefFor('claude-fable-5-2', ['Agent'], TIERS)).toBeUndefined()
+    expect(briefFor('claude-opus-5-5', ['Read', 'Edit'], TIERS)).toBeUndefined()
+    expect(briefFor('claude-opus-5-5', ['Agent'], ['opus', 'sonnet', 'haiku'])).toBeUndefined()
   })
 })

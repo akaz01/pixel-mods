@@ -112,7 +112,11 @@ subagent를 만들 때 모델을 정해 주는 mod입니다.
 - 규칙마다 가장 잘 맞는 모델(`best`)과 그 일을 해낼 수 있는 가장 낮은 모델(`min`)을 적습니다. 모델 이름만 적으면 둘이 같습니다. 기본값: architect는 fable(min opus), planner와 code-reviewer는 opus(min sonnet), security-reviewer와 L3는 opus, tdd-guide와 L2는 sonnet, Explore와 L1은 haiku.
 - `rules.json`의 `top`에 쓸 수 있는 가장 위 모델을 적습니다(기본 `fable`). fable을 못 쓰면 `"top": "opus"`로 바꿉니다. 그러면 opus가 architect를 맡고, 자기 일 중 sonnet도 해낼 수 있는 planner와 code-reviewer만 sonnet에 넘깁니다. `min`보다 아래로는 내려가지 않으므로 security-reviewer는 opus에, code-reviewer는 sonnet 아래로 내려가지 않고 남습니다. `/routing rules`가 지금 배분을 보여 줍니다.
 - 동시 실행 한도(기본 concurrent 4, background 2)를 넘으면 spawn을 막습니다. 한도는 routing이 꺼져 있어도 적용됩니다.
-- 메인 스레드에는 모델을 바꾸지 않고 `/model` 힌트만 toast로 알려 줍니다.
+- 메인 스레드에는 모델을 바꾸지 않고 `/model` 힌트만 toast로 알려 줍니다. 메인 스레드는 opus로 두고, fable은 필요할 때 사람이 고르는 것을 전제로 합니다.
+  - opus에서 설계·아키텍처, 근본 원인 추적, 장애처럼 fable에 맞는 일을 하면 fable을 권합니다. fable을 못 쓰는 계정(`top`이 opus 이하)에서는 권하지 않습니다.
+  - fable에서 평범한 수정·구현을 하면 opus로 내려가라고 알려 줍니다. fable에 맞는 일, 무거운 일, 신호가 없는 짧은 요청에는 알리지 않습니다.
+  - 무거운 일을 opus보다 약한 모델로 하면 한 단계 위를, 가벼운 일을 opus 이상에서 하면 haiku를 권합니다.
+- 메인 스레드가 fable이 아니고 계정에 fable이 있으면, 시스템 프롬프트 끝에 지침을 한 단락 덧붙입니다(`agent-router:fable`). 일은 직접 하되, 설계 결정·근본 원인 추적·장애 디버깅처럼 깊은 판단이 필요한 조각만 `model: "fable"` 담당에게 맡기고, 담당에게 맥락을 빠짐없이 넘기라는 내용입니다. 평범한 수정, 찾기, 검토, 자기 작업 확인은 맡기지 않게 합니다. 지정한 모델은 그대로 지켜집니다. 지침 문장은 바뀌지 않으므로 프롬프트 캐시를 깨지 않습니다.
 
 ### collab-hub
 
