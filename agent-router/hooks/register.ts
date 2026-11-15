@@ -1,7 +1,7 @@
 import { atom, read, update } from 'claude-code'
 import type { AgentSpawnInput, EngineInterface, Register } from 'claude-code'
 
-import { DEFAULT_RULES, decide, hintFor, LEVEL_ROLE, mergeRules, modelFor, tierOf, TIERS } from './route'
+import { briefFor, DEFAULT_RULES, decide, hintFor, LEVEL_ROLE, mergeRules, modelFor, tierOf, TIERS } from './route'
 import type { Role, Rules } from './route'
 import type { Decision, Hint, Switches, Tier } from '../types'
 
@@ -161,6 +161,13 @@ export const register: Register = on => {
       await update($, hints, list => [...list, { at: Date.now(), tier: hint.tier, why: hint.why, isFollowed: false }].slice(-MAX_HINTS))
     }
     return next(e)
+  }).catch(($, e, next) => next(e))
+
+  // Below fable, the thread is told when to hand a piece to a fable subagent; the spawn keeps that model.
+  on('prompt.compose', async ($, e, next) => {
+    const composed = await next(e)
+    const brief = briefFor(e.model, e.tools, rules.models)
+    return brief ? { sections: [...composed.sections, brief] } : composed
   }).catch(($, e, next) => next(e))
 
   on('classic.PostModelSwitch', async ($, e, next) => {

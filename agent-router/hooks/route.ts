@@ -71,17 +71,28 @@ const SIGNALS: Record<Level, { ko: readonly string[]; en: RegExp }> = {
 // "구조체 이름 찾기" is not an architecture task: these count toward level 3 only two at a time.
 const WEAK_L3 = { ko: ['구조', '원인', '보안'], en: /\b(design|security|structure)\b/gi }
 
+// The ambiguous work Anthropic names as fable's: architecture decisions, root-cause investigations, outage debugging.
+const FABLE_WORK = {
+  ko: ['설계', '아키텍처', '근본 원인', '원인 추적', '장애'],
+  en: /\b(architect(?:ure)?|root cause|outage|incident)\b/gi,
+}
+
 const LONG_TASK = 3000
 
+type Signal = { ko: readonly string[]; en: RegExp }
+
+const wordsIn = (text: string, { ko, en }: Signal): string[] => [
+  ...new Set([...ko.filter(word => text.includes(word)), ...[...text.matchAll(en)].map(m => m[0].toLowerCase())]),
+]
+
 export const scoreLevel = (text: string): { level: Level; words: string[] } => {
-  const weak = [...new Set([...WEAK_L3.ko.filter(word => text.includes(word)), ...[...text.matchAll(WEAK_L3.en)].map(m => m[0].toLowerCase())])]
+  const weak = wordsIn(text, WEAK_L3)
   if (weak.length >= 2) return { level: 3, words: weak.slice(0, 3) }
   for (const level of [3, 2, 1] as const) {
-    const { ko, en } = SIGNALS[level]
-    const words = [...ko.filter(word => text.includes(word)), ...[...text.matchAll(en)].map(m => m[0].toLowerCase())]
+    const words = wordsIn(text, SIGNALS[level])
     if (words.length > 0) {
       const bumped = level < 2 && text.length > LONG_TASK ? 2 : level
-      return { level: bumped, words: [...new Set(words)].slice(0, 3) }
+      return { level: bumped, words: words.slice(0, 3) }
     }
   }
   return { level: text.length > LONG_TASK ? 3 : 2, words: [] }
@@ -101,16 +112,39 @@ export const decide = (facts: SpawnFacts, rules: Rules, options: { level: boolea
   return { source: 'level', why: quote(scored.words), level: scored.level, tier: modelFor(LEVEL_ROLE[scored.level], rules.models) }
 }
 
-// Heavy work on a model weaker than the one it asks for gets a hint up; light work on opus or stronger a hint down.
+// The session runs on opus and moves to fable only when a person picks it, so hints go both ways around fable:
+// fable's kind of work on opus gets a hint up, ordinary edits on fable a hint back down to opus. Heavy work on a
+// model weaker than the one it asks for gets a hint up; light work on opus or stronger a hint down.
 export const hintFor = (text: string, model: string, models: readonly Tier[] = TIERS): { tier: Tier; why: string } | undefined => {
   const scored = scoreLevel(text)
+  const fableWork = wordsIn(text, FABLE_WORK)
   const current = tierOf(model)
   const at = current ? TIERS.indexOf(current) : TIERS.length
   const seat = modelFor(LEVEL_ROLE[scored.level], models)
+  if (current === 'opus' && models.includes('fable') && fableWork.length > 0) return { tier: 'fable', why: quote(fableWork.slice(0, 3)) }
   if (scored.level === 3 && TIERS.indexOf(seat) < at) return { tier: seat, why: quote(scored.words) }
   if (scored.level === 1 && current && at <= TIERS.indexOf('opus') && seat !== current) return { tier: seat, why: quote(scored.words) }
+  const isOrdinary = scored.level === 2 && scored.words.length > 0 && fableWork.length === 0
+  if (current === 'fable' && isOrdinary && models.includes('opus')) return { tier: 'opus', why: quote(scored.words) }
   return undefined
 }
+
+// What the main thread reads when it runs below fable on an account that has fable: keep the work, hand fable only
+// the piece that needs its judgement. The text never varies, so the prompt cache holds across turns.
+export const FABLE_BRIEF = {
+  id: 'agent-router:fable',
+  scope: 'session',
+  text: [
+    '# Fable for the hardest decisions',
+    'This session runs on a lighter model than the strongest one the account has, Fable. Do the work yourself, and hand Fable only a piece that needs deep multi-step judgement: an architecture decision, a root-cause investigation, or debugging an outage, when the answer is still unclear after a first look. For that piece, call the Agent tool with `model: "fable"`.',
+    'The subagent starts with none of your context. Brief it once and fully: the goal, what you have found so far, the files and constraints, and the report you want back. Then carry on with the task yourself, using its answer.',
+    'Do not hand Fable ordinary edits, searches, reviews or the checking of your own work, and start at most one Fable subagent for the same question.',
+  ].join('\n\n'),
+} as const
+
+// A thread that can start agents gets the brief, unless it already runs on fable or the account has none.
+export const briefFor = (model: string, tools: readonly string[], models: readonly Tier[]): typeof FABLE_BRIEF | undefined =>
+  tools.includes('Agent') && models.includes('fable') && tierOf(model) !== 'fable' ? FABLE_BRIEF : undefined
 
 const isTier = (value: unknown): value is Tier => typeof value === 'string' && (TIERS as readonly string[]).includes(value)
 
