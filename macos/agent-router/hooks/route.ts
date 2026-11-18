@@ -2,8 +2,8 @@ import type { Level, Limits, Source, Tier } from '../types'
 
 // What a role asks of a model: best is the model whose strengths fit the work, min the weakest one that can still
 // do it well. Deep multi-step judgement is fable's, planning, hard analysis and reviewing code opus's, writing code
-// sonnet's, fast lookups haiku's.
-export type Role = { best: Tier; min: Tier }
+// sonnet's, fast lookups haiku's. up, when set, is the strongest model a heavy piece of the work may climb to.
+export type Role = { best: Tier; min: Tier; up?: Tier }
 
 // models lists the ones present, from the rules file's "top" model down.
 export type Rules = { types: Record<string, Role>; limits: Limits; models: readonly Tier[] }
@@ -21,8 +21,13 @@ export const LEVEL_ROLE: Record<Level, Role> = { 1: only('haiku'), 2: only('sonn
 
 const DESIGN: Role = { best: 'fable', min: 'opus' }
 const PLANNING: Role = { best: 'opus', min: 'sonnet' }
-// The reviewer should not be weaker than the model that wrote the code; sonnet can still review when it must.
-const CODE_REVIEW: Role = { best: 'opus', min: 'sonnet' }
+// The reviewer should not be weaker than the model that wrote the code, so code review runs on opus or stronger:
+// never below opus, and up to fable when the review is heavy.
+const CODE_REVIEW: Role = { best: 'opus', min: 'opus', up: 'fable' }
+
+// Every reviewer agent (typescript-reviewer, ecc:python-reviewer, "Code Reviewer", ...) gets the code review role
+// unless the rules file names it.
+const isReviewer = (type: string): boolean => /reviewer$/i.test(type)
 
 export const DEFAULT_RULES: Rules = {
   types: {
@@ -30,8 +35,8 @@ export const DEFAULT_RULES: Rules = {
     'ecc:architect': DESIGN,
     planner: PLANNING,
     'ecc:planner': PLANNING,
-    'security-reviewer': only('opus'),
-    'ecc:security-reviewer': only('opus'),
+    'security-reviewer': CODE_REVIEW,
+    'ecc:security-reviewer': CODE_REVIEW,
     'code-reviewer': CODE_REVIEW,
     'ecc:code-reviewer': CODE_REVIEW,
     'tdd-guide': only('sonnet'),
@@ -55,12 +60,12 @@ export const modelFor = (role: Role, models: readonly Tier[]): Tier => {
 // Level 3's words are the clear ones; everyday words that only sometimes mean a big task live in WEAK_L3.
 const SIGNALS: Record<Level, { ko: readonly string[]; en: RegExp }> = {
   3: {
-    ko: ['설계', '아키텍처', '여러 파일', '근본 원인', '보안 취약', '보안 점검', '마이그레이션'],
-    en: /\b(architect(?:ure)?|multi-?file|multiple files|across files|root cause|security (?:review|audit)|vulnerabilit\w*|migration)\b/gi,
+    ko: ['설계', '아키텍처', '여러 파일', '근본 원인', '보안 취약', '보안 점검', '마이그레이션', '리뷰', '코드 검토'],
+    en: /\b(architect(?:ure)?|multi-?file|multiple files|across files|root cause|security (?:review|audit)|vulnerabilit\w*|migration|review(?:s|ed|ing|er|ers)?)\b/gi,
   },
   2: {
-    ko: ['수정', '고쳐', '구현', '추가', '테스트', '리뷰', '리팩터', '버그'],
-    en: /\b(fix|implement|add|test|review|refactor|bug|update|edit)\w*/gi,
+    ko: ['수정', '고쳐', '구현', '추가', '테스트', '리팩터', '버그'],
+    en: /\b(fix|implement|add|test|refactor|bug|update|edit)\w*/gi,
   },
   1: {
     ko: ['찾', '검색', '목록', '요약', '이름', '개수', '위치'],
@@ -78,6 +83,15 @@ const FABLE_WORK = {
 }
 
 const LONG_TASK = 3000
+
+// A review asked for in so many words, by an agent with no type rule.
+const REVIEW = { ko: ['리뷰', '코드 검토'], en: /\breview(?:s|ed|ing|er|ers)?\b/gi }
+
+// What makes a piece of work heavy enough to climb to its role's up: fable's kind of work, or many files.
+const HEAVY = {
+  ko: [...FABLE_WORK.ko, '여러 파일', '전체 코드'],
+  en: /\b(architect(?:ure)?|root cause|outage|incident|multi-?file|multiple files|across files|whole (?:repo|codebase))\b/gi,
+}
 
 type Signal = { ko: readonly string[]; en: RegExp }
 
@@ -103,13 +117,31 @@ export const tierOf = (model: string | undefined): Tier | undefined =>
 
 const quote = (words: string[]): string => (words.length ? words.map(w => `"${w}"`).join(', ') : 'no signal')
 
+// A role with an up climbs there for heavy work, but only from its own best model and only if up is present:
+// a model standing in for a missing one does not climb.
+const climb = (role: Role, tier: Tier, text: string, models: readonly Tier[]): { tier: Tier; words: string[] } | undefined => {
+  if (!role.up || tier !== role.best || !models.includes(role.up)) return undefined
+  const words = text.length > LONG_TASK ? ['long task'] : wordsIn(text, HEAVY).slice(0, 3)
+  return words.length > 0 ? { tier: role.up, words } : undefined
+}
+
 export const decide = (facts: SpawnFacts, rules: Rules, options: { level: boolean }): Choice => {
   if (facts.model) return { source: 'explicit', why: `explicit ${facts.model}` }
-  const ruled = rules.types[facts.subagentType]
-  if (ruled) return { source: 'rule', why: 'rule', tier: modelFor(ruled, rules.models) }
+  const text = `${facts.description}\n${facts.prompt}`
+  const ruled = rules.types[facts.subagentType] ?? (isReviewer(facts.subagentType) ? CODE_REVIEW : undefined)
+  if (ruled) {
+    const tier = modelFor(ruled, rules.models)
+    const up = climb(ruled, tier, text, rules.models)
+    return up ? { source: 'rule', why: `rule, heavy ${quote(up.words)}`, tier: up.tier } : { source: 'rule', why: 'rule', tier }
+  }
   if (!options.level) return { source: 'none', why: 'no rule' }
-  const scored = scoreLevel(`${facts.description}\n${facts.prompt}`)
-  return { source: 'level', why: quote(scored.words), level: scored.level, tier: modelFor(LEVEL_ROLE[scored.level], rules.models) }
+  const scored = scoreLevel(text)
+  const role = wordsIn(text, REVIEW).length > 0 ? CODE_REVIEW : LEVEL_ROLE[scored.level]
+  const tier = modelFor(role, rules.models)
+  const up = climb(role, tier, text, rules.models)
+  return up
+    ? { source: 'level', why: `${quote(scored.words)}, heavy ${quote(up.words)}`, level: scored.level, tier: up.tier }
+    : { source: 'level', why: quote(scored.words), level: scored.level, tier }
 }
 
 // The session runs on opus and moves to fable only when a person picks it, so hints go both ways around fable:
@@ -138,7 +170,7 @@ export const FABLE_BRIEF = {
     '# Fable for the hardest decisions',
     'This session runs on a lighter model than the strongest one the account has, Fable. Do the work yourself, and hand Fable only a piece that needs deep multi-step judgement: an architecture decision, a root-cause investigation, or debugging an outage, when the answer is still unclear after a first look. For that piece, call the Agent tool with `model: "fable"`.',
     'The subagent starts with none of your context. Brief it once and fully: the goal, what you have found so far, the files and constraints, and the report you want back. Then carry on with the task yourself, using its answer.',
-    'Do not hand Fable ordinary edits, searches, reviews or the checking of your own work, and start at most one Fable subagent for the same question.',
+    'Do not hand Fable ordinary edits, searches, routine reviews or the checking of your own work, and start at most one Fable subagent for the same question.',
   ].join('\n\n'),
 } as const
 
@@ -148,13 +180,15 @@ export const briefFor = (model: string, tools: readonly string[], models: readon
 
 const isTier = (value: unknown): value is Tier => typeof value === 'string' && (TIERS as readonly string[]).includes(value)
 
-// A rule is a model name (best and min alike) or { best, min }; a min stronger than the best fit is the best fit.
+// A rule is a model name (best and min alike) or { best, min, up }; a min stronger than the best fit is the best
+// fit, and an up no stronger than the best fit is dropped.
 const roleOf = (value: unknown): Role | undefined => {
   if (isTier(value)) return only(value)
   if (typeof value !== 'object' || value === null) return undefined
-  const { best, min } = value as { best?: unknown; min?: unknown }
+  const { best, min, up } = value as { best?: unknown; min?: unknown; up?: unknown }
   if (!isTier(best)) return undefined
-  return { best, min: isTier(min) && TIERS.indexOf(min) > TIERS.indexOf(best) ? min : best }
+  const role = { best, min: isTier(min) && TIERS.indexOf(min) > TIERS.indexOf(best) ? min : best }
+  return isTier(up) && TIERS.indexOf(up) < TIERS.indexOf(best) ? { ...role, up } : role
 }
 
 // Models go missing from the top only: the strongest one the account has, and every model under it.

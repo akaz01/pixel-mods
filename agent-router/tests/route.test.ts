@@ -27,6 +27,13 @@ describe('scoreLevel', () => {
     expect(scoreLevel('security review of auth').level).toBe(3)
   })
 
+  test('code review is level 3, so it runs on opus at least', async () => {
+    expect(scoreLevel('이 변경 코드 리뷰해 줘').level).toBe(3)
+    expect(scoreLevel('코드 검토 부탁해').level).toBe(3)
+    expect(scoreLevel('review the diff').level).toBe(3)
+    expect(scoreLevel('open the preview page').level).toBe(2)
+  })
+
   test('the strongest signal wins and the words are reported', async () => {
     const scored = scoreLevel('파일 찾아서 구조 설계까지')
     expect(scored.level).toBe(3)
@@ -59,6 +66,43 @@ describe('decide', () => {
     expect(decide(spawn('Explore', 'x'), DEFAULT_RULES, { level: true }).tier).toBe('haiku')
   })
 
+  test('every reviewer type runs on opus at least, rule or not', async () => {
+    const tier = (type: string, top = 'fable') =>
+      decide(spawn(type, 'x'), { ...DEFAULT_RULES, models: mergeRules({ top }).models }, { level: true }).tier
+    for (const type of ['code-reviewer', 'ecc:code-reviewer', 'typescript-reviewer', 'ecc:python-reviewer', 'Code Reviewer']) {
+      expect(tier(type)).toBe('opus')
+      expect(tier(type, 'opus')).toBe('opus')
+    }
+    expect(tier('typescript-reviewer', 'sonnet')).toBe('sonnet')
+  })
+
+  test('a heavy review steps up to fable; an ordinary one stays on opus', async () => {
+    const tier = (type: string, text: string, top = 'fable') =>
+      decide(spawn(type, text), { ...DEFAULT_RULES, models: mergeRules({ top }).models }, { level: true })
+    expect(tier('code-reviewer', '로그인 버그 수정 리뷰').tier).toBe('opus')
+    expect(tier('code-reviewer', '결제 모듈 아키텍처 리뷰').tier).toBe('fable')
+    expect(tier('code-reviewer', '결제 모듈 아키텍처 리뷰').why).toContain('아키텍처')
+    expect(tier('typescript-reviewer', 'x'.repeat(3001)).tier).toBe('fable')
+    expect(tier('general-purpose', '여러 파일에 걸친 코드 리뷰').tier).toBe('fable')
+    expect(tier('general-purpose', '여러 파일 수정').tier).toBe('opus')
+    expect(tier('code-reviewer', '결제 모듈 아키텍처 리뷰', 'opus').tier).toBe('opus')
+  })
+
+  test('a rule may name an up stronger than its best fit; a weaker one is dropped', async () => {
+    const types = mergeRules({ types: { a: { best: 'opus', min: 'opus', up: 'fable' }, b: { best: 'opus', up: 'haiku' } } }).types
+    expect(types).toEqual({ a: { best: 'opus', min: 'opus', up: 'fable' }, b: { best: 'opus', min: 'opus' } })
+  })
+
+  test('a reviewer named in the rules file keeps that rule, heavy or not', async () => {
+    const heavy = mergeRules({ types: { 'code-reviewer': 'sonnet' } })
+    expect(decide(spawn('code-reviewer', '아키텍처 리뷰'), heavy, { level: true }).tier).toBe('sonnet')
+  })
+
+  test('a reviewer named in the rules file keeps that rule', async () => {
+    const rules = mergeRules({ types: { 'typescript-reviewer': 'sonnet' } })
+    expect(decide(spawn('typescript-reviewer', 'x'), rules, { level: true }).tier).toBe('sonnet')
+  })
+
   const tiersWith = (top: string) => {
     const rules = { ...DEFAULT_RULES, models: mergeRules({ top }).models }
     const tier = (type: string, text = 'x') => decide(spawn(type, text), rules, { level: true }).tier
@@ -66,7 +110,7 @@ describe('decide', () => {
   }
 
   test('without fable, opus takes the design role and hands down only what sonnet can do', async () => {
-    expect(tiersWith('opus')).toEqual(['opus', 'sonnet', 'opus', 'sonnet', 'haiku', 'opus'])
+    expect(tiersWith('opus')).toEqual(['opus', 'sonnet', 'opus', 'opus', 'haiku', 'opus'])
   })
 
   test('a role never drops below the weakest model that can do it while that model is present', async () => {
