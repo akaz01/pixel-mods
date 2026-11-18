@@ -108,9 +108,11 @@ Mac:
 subagent를 만들 때 모델을 정해 주는 mod입니다.
 
 - type별 규칙(`rules.json`)과 작업 level(L1-L3)로 fable, opus, sonnet, haiku 중 하나를 고릅니다. fork와 workflow는 건드리지 않습니다.
-- 역할은 모델의 능력에 맞춰 나눕니다. 여러 단계를 깊이 따지는 설계는 fable, 계획과 어려운 분석·보안 검토·코드 검토는 opus, 코드 작성은 sonnet, 빠른 찾기는 haiku가 맡습니다. 코드 검토를 opus에 두는 것은 검토하는 모델이 코드를 쓴 모델보다 약하지 않게 하려는 것입니다.
-- 규칙마다 가장 잘 맞는 모델(`best`)과 그 일을 해낼 수 있는 가장 낮은 모델(`min`)을 적습니다. 모델 이름만 적으면 둘이 같습니다. 기본값: architect는 fable(min opus), planner와 code-reviewer는 opus(min sonnet), security-reviewer와 L3는 opus, tdd-guide와 L2는 sonnet, Explore와 L1은 haiku.
-- `rules.json`의 `top`에 쓸 수 있는 가장 위 모델을 적습니다(기본 `fable`). fable을 못 쓰면 `"top": "opus"`로 바꿉니다. 그러면 opus가 architect를 맡고, 자기 일 중 sonnet도 해낼 수 있는 planner와 code-reviewer만 sonnet에 넘깁니다. `min`보다 아래로는 내려가지 않으므로 security-reviewer는 opus에, code-reviewer는 sonnet 아래로 내려가지 않고 남습니다. `/routing rules`가 지금 배분을 보여 줍니다.
+- 역할은 모델의 능력에 맞춰 나눕니다. 여러 단계를 깊이 따지는 설계는 fable, 계획과 어려운 분석·보안 검토·코드 검토는 opus, 코드 작성은 sonnet, 빠른 찾기는 haiku가 맡습니다. 코드 검토를 opus에 두는 것은 검토하는 모델이 코드를 쓴 모델보다 약하지 않게 하려는 것이라, 코드 검토는 opus 또는 그보다 높은 모델이 맡습니다.
+- 코드 검토와 보안 검토는 평소 opus가 맡고, 설계·아키텍처·근본 원인·장애·여러 파일을 다루거나 아주 긴(3000자 넘는) 검토는 fable로 올립니다. fable을 못 쓰는 계정에서는 opus에 남습니다.
+- 이름이 `reviewer`로 끝나는 agent(typescript-reviewer, ecc:python-reviewer, Code Reviewer 등)는 `rules.json`에 따로 적지 않아도 code-reviewer와 같은 규칙을 따릅니다. type 규칙이 없는 agent도 "리뷰", "코드 검토", "review"가 들어가면 같은 규칙으로 보냅니다.
+- 규칙마다 가장 잘 맞는 모델(`best`)과 그 일을 해낼 수 있는 가장 낮은 모델(`min`)을 적고, 어려운 일일 때 올라갈 수 있는 가장 높은 모델(`up`)을 적을 수 있습니다. 모델 이름만 적으면 셋이 같습니다. 기본값: architect는 fable(min opus), planner는 opus(min sonnet), code-reviewer·security-reviewer는 opus(min opus, up fable), L3는 opus, tdd-guide와 L2는 sonnet, Explore와 L1은 haiku.
+- `rules.json`의 `top`에 쓸 수 있는 가장 위 모델을 적습니다(기본 `fable`). fable을 못 쓰면 `"top": "opus"`로 바꿉니다. 그러면 opus가 architect를 맡고, 자기 일 중 sonnet도 해낼 수 있는 planner만 sonnet에 넘깁니다. `min`보다 아래로는 내려가지 않으므로 security-reviewer와 code-reviewer는 opus에 남습니다. `/routing rules`가 지금 배분을 보여 줍니다.
 - 동시 실행 한도(기본 concurrent 6, background 6)를 넘으면 spawn을 막습니다. 한도는 routing이 꺼져 있어도 적용됩니다.
 - 메인 스레드에는 모델을 바꾸지 않고 `/model` 힌트만 toast로 알려 줍니다. 메인 스레드는 opus로 두고, fable은 필요할 때 사람이 고르는 것을 전제로 합니다.
   - opus에서 설계·아키텍처, 근본 원인 추적, 장애처럼 fable에 맞는 일을 하면 fable을 권합니다. fable을 못 쓰는 계정(`top`이 opus 이하)에서는 권하지 않습니다.
