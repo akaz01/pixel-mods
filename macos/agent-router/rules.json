@@ -13,5 +13,5 @@
     "ecc:tdd-guide": "sonnet",
     "Explore": "haiku"
   },
-  "limits": { "concurrent": 4, "background": 2 }
+  "limits": { "concurrent": 6, "background": 6 }
 }

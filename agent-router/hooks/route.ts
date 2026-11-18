@@ -38,7 +38,7 @@ export const DEFAULT_RULES: Rules = {
     'ecc:tdd-guide': only('sonnet'),
     Explore: only('haiku'),
   },
-  limits: { concurrent: 4, background: 2 },
+  limits: { concurrent: 6, background: 6 },
   models: TIERS,
 }
 

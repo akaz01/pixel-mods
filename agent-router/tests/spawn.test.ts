@@ -34,20 +34,20 @@ test('an explicit model is kept', async ($, on) => {
   expect(started.model).toBe('sonnet')
 })
 
-test('the concurrency limit blocks a fifth agent', async ($, on) => {
-  engine(on, 4)
+test('the concurrency limit blocks a seventh agent', async ($, on) => {
+  engine(on, 6)
   const started = await $.agent.spawn({ ...BASE, subagentType: 'general-purpose', prompt: '파일 찾기' } as never)
-  expect(started.deny).toContain('limit 4')
+  expect(started.deny).toContain('limit 6')
 })
 
 test('spawns started together still respect the limit', async ($, on) => {
   engine(on)
-  const results = await Promise.all(Array.from({ length: 6 }, (_, i) => $.agent.spawn({ ...BASE, tool_use_id: `p${i}`, subagentType: 'Explore', prompt: 'find' } as never)))
+  const results = await Promise.all(Array.from({ length: 8 }, (_, i) => $.agent.spawn({ ...BASE, tool_use_id: `p${i}`, subagentType: 'Explore', prompt: 'find' } as never)))
   expect(results.filter(r => r.deny !== undefined).length).toBe(2)
 })
 
 test('the limit holds with routing off', async ($, on) => {
-  engine(on, 4)
+  engine(on, 6)
   await $.command.run({ command: 'routing', args: 'off' } as never)
   const started = await $.agent.spawn({ ...BASE, subagentType: 'Explore', prompt: 'find' } as never)
   expect(started.deny).toBeDefined()
