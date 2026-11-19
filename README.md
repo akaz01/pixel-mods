@@ -95,6 +95,21 @@
 
 <p align="center"><img src="docs/images/install.png" alt="설치 3단계: 1 Claude Code 켜기, 2 명령 다섯 줄 입력, 3 다시 켜기" width="100%"></p>
 
+### 🤖 가장 쉬운 방법: 주소 붙여넣기
+
+Claude Code 입력창에 저장소 주소를 붙여넣고 설치해 달라고 하면, Claude가 OS를 확인해 맞는 버전을 대신 설치해 줍니다.
+
+```text
+https://github.com/akaz01/pixel-mods 설치해줘
+```
+
+| 확인할 것 | 내용 |
+|---|---|
+| 🔁 다시 켜기 | 설치가 끝나면 Claude Code를 껐다 켜야 mod가 보임 |
+| 🙋 물어보면 | 설치 범위는 **user**, 실행 승인은 허용으로 답하면 됨 |
+
+### ⌨️ 직접 입력하기
+
 > [!IMPORTANT]
 > 명령은 PowerShell이나 터미널이 아니라 **Claude Code 입력창**에 한 줄씩 입력합니다. 설치 범위(scope)를 물으면 **user**를 고릅니다. 그래야 모든 폴더에서 켜집니다.
 
