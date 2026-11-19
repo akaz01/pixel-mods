@@ -1,13 +1,14 @@
 <p align="center">
-  <img src="docs/images/banner.svg" alt="pixel-mods: Claude Code를 픽셀 작업 보드로 개조하는 mod 4종" width="100%">
+  <img src="docs/images/hero.png" alt="PIXEL MODS: Claude가 지금 하는 일을 터미널 옆 픽셀 보드에서 한눈에. 오른쪽에 실제 work-board 화면" width="100%">
 </p>
 
 <div align="center">
 
 ![mods](https://img.shields.io/badge/mods-4-f8b800)
+![tabs](https://img.shields.io/badge/board%20tabs-6-d97757)
+![commands](https://img.shields.io/badge/commands-21-b8b8f8)
 ![platform](https://img.shields.io/badge/platform-Windows%20%C2%B7%20macOS-3cbcfc)
-![claude code](https://img.shields.io/badge/Claude%20Code-plugin-d97757)
-![style](https://img.shields.io/badge/style-8--bit%20pixel-58d854)
+![claude code](https://img.shields.io/badge/Claude%20Code-plugin-58d854)
 
 **mod 4개** | 작업 보드 · 모델 배정 · 세션 협업 · 명령 검사 | Windows · macOS | Claude Code
 
@@ -28,68 +29,41 @@
 
 ---
 
-<br>
+# 📘 한눈에 보기
 
-<p align="center"><b>Claude가 지금 무엇을 하는지, 터미널 옆 픽셀 보드에서 한눈에 봅니다.</b></p>
+<p align="center"><img src="docs/images/overview.png" alt="Claude Code 세션 아래에서 agent-router, collab-hub, safe-shell이 일하고, 그 결과를 work-board가 보여 주는 구조" width="100%"></p>
 
-<p align="center">Claude Code용 mod 네 개를 모아 둔 저장소입니다.<br>
-픽셀 아트 스타일의 작업 보드(<b>work-board</b>)와, 보드가 읽어 가는 세 가지 보조 mod(<b>agent-router</b>, <b>collab-hub</b>, <b>safe-shell</b>)로 이루어져 있습니다.<br>
-각 mod는 독립된 플러그인 폴더이며, work-board는 나머지 세 mod를 의존성으로 선언합니다.</p>
+| | mod | 하는 일 | 언제 움직이나 | 보드에서 보는 곳 | 대표 명령 |
+|:---:|---|---|---|---|---|
+| 🟨 | **work-board** | 화면 오른쪽 픽셀 작업 보드 | 세션을 열 때 자동으로 | 보드 전체 | `/board` |
+| 🟪 | **agent-router** | subagent마다 모델 고르기 · 동시 실행 제한 | subagent를 만들 때 | ROUTING 탭 · PARTY 창 | `/routing` |
+| 🟩 | **collab-hub** | 같은 PC 세션끼리 공지 · 파일 잠금 · 요청 | 늘 (30초마다 새 소식 읽기) | COLLAB 탭 · SESSIONS 창 | `/collab` |
+| 🟥 | **safe-shell** | Bash · PowerShell 명령을 3단계로 검사 | 명령 실행 직전 | STATUS의 BLOCKED 수 · 알림 | `/safe-shell` |
 
-<table>
-<tr>
-<td width="52%" valign="top">
-<img src="docs/images/board-running.png" alt="work-board RUNNING 탭: Claude가 결제 화면 코드를 고치는 중" width="100%">
-</td>
-<td valign="top">
+> work-board는 나머지 세 mod를 의존성으로 선언합니다. 네 mod 모두 따로 켜고 끌 수 있는 독립 플러그인입니다.
 
-### 보드에서 보이는 것
+## 보드 읽는 법
 
-- **맨 위 노란 띠**: 프로젝트 폴더와 세션 시간
-- **픽셀 Claude와 말풍선**: 지금 하는 일을 한 단어로 (THINKING, CODING, RUNNING, TESTING, DONE …)
-- **왼쪽 글자**: 모델, 플랜, 주간·5시간 남은 사용량
-- **STATUS**: RAM, CONTEXT 게이지와 함께 일하는 subagent 수, 연결된 세션 수, 막힌 명령 수
-- **RUNNING 탭**: 일하는 subagent(PARTY), 쓴 스킬과 플러그인, 다른 세션, 요청과 단계별 timeline, 건드린 파일
+<p align="center"><img src="docs/images/board-anatomy.png" alt="work-board 화면에 번호를 붙여 노란 띠, 사용량, 픽셀 Claude, 말풍선, STATUS, 탭, PARTY 창을 설명한 그림" width="100%"></p>
 
-설치하면 세션을 열 때마다 화면 오른쪽에 자동으로 열립니다.
+### 탭 6개
 
-> 그림은 예시 데이터를 넣어 실제 보드 코드로 그린 화면입니다.
-
-</td>
-</tr>
-</table>
-
-| 처음이세요? | 쓰고 계세요? | 무엇을 할 수 있나요? | 그만 쓰려면? |
-|:---:|:---:|:---:|:---:|
-| **[설치하기](#설치하기)** | **[업데이트](#업데이트)** | **[명령어 목록](#명령어-목록)** | **[지우기](#지우기)** |
-| Claude Code 안에서 명령 다섯 줄 | 마켓플레이스 새로 받기 | 보드 · 라우팅 · 협업 · 셸 | mod 네 개 지우기 |
-
-<br>
-
----
-
-# 📘 소개
-
-## 한눈에 보기
-
-| | mod | 하는 일 | 보드에서 보는 곳 |
-|:---:|---|---|---|
-| 🟨 | **work-board** | 화면 오른쪽에 붙는 픽셀 작업 보드. 상태, 사용량, 요청 timeline, 건드린 파일 | 보드 전체 |
-| 🟪 | **agent-router** | subagent를 만들 때 일의 종류와 난이도로 모델을 고르고, 동시 실행 수를 막습니다 | ROUTING 탭, PARTY 창 |
-| 🟩 | **collab-hub** | 같은 PC의 세션끼리 공지, 파일 claim, 요청과 답을 주고받습니다 | COLLAB 탭, SESSIONS 창 |
-| 🟥 | **safe-shell** | Bash와 PowerShell 명령을 실행 전에 3단계로 검사합니다 | STATUS의 BLOCKED 수, 알림(toast) |
-
-같은 네 mod를 **Windows 버전**(저장소 루트, `<mod>@pixel-mods`)과 **macOS 버전**(`macos/` 폴더, `<mod>-macos@pixel-mods`) 두 벌로 둡니다. 명령 이름과 화면은 두 버전이 같습니다. 한 컴퓨터에는 그 OS에 맞는 한 벌만 설치합니다.
+| 탭 | 보여 주는 것 | 정보를 주는 mod |
+|---|---|:---:|
+| **RUNNING** | 메인 상태 · 일하는 subagent(PARTY) · 쓴 스킬과 플러그인 · 다른 세션 · 요청 timeline · 건드린 파일 | 🟨 🟪 🟩 |
+| **ROUTING** | subagent마다 고른 모델과 이유 · 동시 실행 한도 · 메인 모델 힌트를 따랐는지 | 🟪 |
+| **COLLAB** | 이 PC의 세션 · claim한 파일 · 주고받은 요청(thread) · 공지 | 🟩 |
+| **TIMELINE** | 요청과 도구 단계를 길게 | 🟨 |
+| **USAGE** | 5시간·주간 남은 양과 초기화 시각 · 이번 세션 사용량 · 최근 7일 | 🟨 |
+| **?** | 명령 안내 | 🟨 |
 
 ## 화면 보기
 
-보드 아래쪽 탭을 누르면 mod마다 자세한 화면이 열립니다.
-
 <table>
 <tr>
-<th width="33%">ROUTING · agent-router</th>
-<th width="33%">COLLAB · collab-hub</th>
-<th width="33%">USAGE · work-board</th>
+<th width="33%">🟪 ROUTING</th>
+<th width="33%">🟩 COLLAB</th>
+<th width="33%">🟨 USAGE</th>
 </tr>
 <tr>
 <td valign="top"><img src="docs/images/board-routing.png" alt="ROUTING 탭: subagent마다 고른 모델, 동시 실행 한도, 메인 모델 힌트" width="100%"></td>
@@ -97,13 +71,19 @@
 <td valign="top"><img src="docs/images/board-usage.png" alt="USAGE 탭: 5시간·주간 남은 사용량, 이번 세션 사용량, 최근 7일" width="100%"></td>
 </tr>
 <tr>
-<td valign="top">subagent마다 고른 모델과 이유, 동시 실행 한도, 메인 스레드 모델 힌트를 따랐는지</td>
-<td valign="top">이 PC에서 돌아가는 세션과 claim한 파일, 주고받는 요청(thread), 공지</td>
-<td valign="top">5시간·주간 남은 양과 초기화 시각, 이번 세션에 쓴 양, 최근 7일 기록</td>
+<td valign="top">고른 모델과 이유 · 동시 실행 한도 · 메인 모델 힌트</td>
+<td valign="top">세션 · claim한 파일 · 요청 thread · 공지</td>
+<td valign="top">남은 양 · 초기화 시각 · 세션 사용량 · 7일 기록</td>
 </tr>
 </table>
 
-TIMELINE 탭은 요청과 단계를 길게 보여 주고, `?` 탭은 명령 안내입니다.
+<details>
+<summary><b>RUNNING 탭 전체 화면 보기</b></summary>
+<br>
+<p align="center"><img src="docs/images/board-running.png" alt="work-board RUNNING 탭 전체: Claude가 결제 화면 코드를 고치는 중" width="520"></p>
+</details>
+
+> 그림은 예시 데이터를 넣어 실제 보드 코드로 그린 화면입니다.
 
 <br>
 
@@ -113,19 +93,15 @@ TIMELINE 탭은 요청과 단계를 길게 보여 주고, `?` 탭은 명령 안�
 
 ## 설치하기
 
-[Claude Code](https://claude.com/claude-code)가 설치되어 있어야 합니다.
+<p align="center"><img src="docs/images/install.png" alt="설치 3단계: 1 Claude Code 켜기, 2 명령 다섯 줄 입력, 3 다시 켜기" width="100%"></p>
 
-> **설치 명령은 PowerShell이나 터미널에 붙여 넣는 것이 아니라 Claude Code 안에서 입력합니다.**
+> [!IMPORTANT]
+> 명령은 PowerShell이나 터미널이 아니라 **Claude Code 입력창**에 한 줄씩 입력합니다. 설치 범위(scope)를 물으면 **user**를 고릅니다. 그래야 모든 폴더에서 켜집니다.
 
-#### 1단계: Claude Code 켜기
-
-터미널(Windows는 PowerShell, Mac은 Terminal 앱)에서 `claude`를 입력해 Claude Code를 켭니다.
-
-#### 2단계: 명령 입력하기
-
-Claude Code 입력창에 아래 줄을 **한 줄씩** 입력하고 Enter를 누릅니다. 설치 범위(scope)를 물으면 **user**를 고릅니다. 그래야 모든 폴더에서 켜집니다.
-
-**Windows**
+<table>
+<tr><th width="50%">🪟 Windows</th><th width="50%">🍎 Mac</th></tr>
+<tr>
+<td>
 
 ```text
 /plugin marketplace add akaz01/pixel-mods
@@ -135,7 +111,8 @@ Claude Code 입력창에 아래 줄을 **한 줄씩** 입력하고 Enter를 누�
 /plugin install safe-shell@pixel-mods
 ```
 
-**Mac**
+</td>
+<td>
 
 ```text
 /plugin marketplace add akaz01/pixel-mods
@@ -145,38 +122,43 @@ Claude Code 입력창에 아래 줄을 **한 줄씩** 입력하고 Enter를 누�
 /plugin install safe-shell-macos@pixel-mods
 ```
 
-#### 3단계: 다시 켜기
+</td>
+</tr>
+</table>
 
-다 입력했으면 Claude Code를 껐다가 다시 켭니다. 오른쪽에 Work Board가 자동으로 열립니다.
+| 확인할 것 | 내용 |
+|---|---|
+| ✅ 설치됐는지 | 입력창에 `/plugin` → Installed 목록에 네 mod가 `@pixel-mods`로 보이면 끝 |
+| ⚠️ 한 버전만 | 한 컴퓨터에는 그 OS 버전만 설치합니다. 둘 다 켜면 `/board` 같은 명령이 겹쳐 나중에 켜진 쪽이 거부됩니다 |
+| 🖥️ 데스크톱 앱 | Code 탭에서는 설치 명령을 쓸 수 없습니다. 터미널에서 user 범위로 설치하면 데스크톱 앱에서도 켜집니다 |
 
-> **주의**
-> - 한 컴퓨터에는 한 버전만 설치합니다. 두 버전을 같이 켜면 `/board` 같은 명령이 겹쳐서 나중에 켜진 쪽이 거부됩니다.
-> - 설치가 됐는지는 입력창에 `/plugin`을 입력해 Installed 목록에서 네 mod가 `@pixel-mods`로 보이는지 확인합니다.
-> - 데스크톱 앱의 Code 탭에서는 이 명령을 쓸 수 없습니다. 터미널의 Claude Code에서 user 범위로 설치하면 데스크톱 앱에서도 켜집니다.
+## 켜고 끄기
 
-### 켜고 끄기
+| 하고 싶은 일 | 입력 | 결과 |
+|---|---|---|
+| 보드 닫기 | `/board close` | 다음 세션부터 자동으로 열리지 않음 |
+| 보드 다시 열기 | `/board` | 다음 세션부터 다시 자동으로 열림 |
+| mod 잠시 끄기 | `/plugin disable <mod>@pixel-mods` | 그 mod만 꺼짐 |
+| mod 다시 켜기 | `/plugin enable <mod>@pixel-mods` | 다시 켜짐 |
 
-설치한 뒤에는 따로 켤 필요가 없습니다.
-
-- 보드를 `/board close`로 닫으면 다음 세션부터는 자동으로 열리지 않습니다. 다시 `/board`로 열면 그다음 세션부터 다시 자동으로 열립니다.
-- mod를 잠시 끄려면 Claude Code 입력창에 `/plugin disable <mod>@pixel-mods`, 다시 켜려면 `/plugin enable <mod>@pixel-mods`를 입력합니다. macOS에서는 mod 이름 뒤에 `-macos`가 붙습니다(예: `work-board-macos@pixel-mods`).
+> macOS에서는 mod 이름 뒤에 `-macos`가 붙습니다. 예: `work-board-macos@pixel-mods`
 
 ## 업데이트
 
-Claude Code 입력창에 아래 줄을 입력해 마켓플레이스를 새로 받습니다.
-
-```text
-/plugin marketplace update pixel-mods
-```
-
-그다음 `/plugin`을 입력해 Installed 목록에서 mod를 골라 업데이트하고, Claude Code를 껐다가 다시 켭니다.
+| 단계 | 할 일 |
+|:---:|---|
+| 1 | 입력창에 `/plugin marketplace update pixel-mods` |
+| 2 | `/plugin` → Installed 목록에서 mod를 골라 업데이트 |
+| 3 | Claude Code를 껐다가 다시 켜기 |
 
 ## 지우기
 
-Claude Code 입력창에 아래 줄을 한 줄씩 입력합니다.
+Claude Code 입력창에 한 줄씩 입력합니다.
 
-<details>
-<summary><b>Windows</b></summary>
+<table>
+<tr><th width="50%">🪟 Windows</th><th width="50%">🍎 Mac</th></tr>
+<tr>
+<td>
 
 ```text
 /plugin uninstall work-board@pixel-mods
@@ -186,10 +168,8 @@ Claude Code 입력창에 아래 줄을 한 줄씩 입력합니다.
 /plugin marketplace remove pixel-mods
 ```
 
-</details>
-
-<details>
-<summary><b>Mac</b></summary>
+</td>
+<td>
 
 ```text
 /plugin uninstall work-board-macos@pixel-mods
@@ -199,20 +179,9 @@ Claude Code 입력창에 아래 줄을 한 줄씩 입력합니다.
 /plugin marketplace remove pixel-mods
 ```
 
-</details>
-
-## Windows 버전과 macOS 버전
-
-두 버전은 명령과 기능이 같습니다. macOS 버전은 Mac 기본 터미널에서 깨끗하게 보이도록 다음이 다릅니다.
-
-- **work-board**: macOS 기본 터미널(Terminal.app)은 블록 글자(`█▄▀`)를 글꼴로 그려서 칸 사이에 틈이 생기고, 겹선 테두리(`╔═╗`)도 점선처럼 끊깁니다. 그래서 macOS 버전은 다음처럼 그립니다. 글꼴이나 터미널 설정은 바꾸지 않아도 됩니다.
-  - 캐릭터는 배경색 칸으로만 그립니다.
-  - 창 테두리는 Terminal.app에서 깨끗하게 이어지는 둥근 홑선(`╭─╮`)을 씁니다.
-  - 말풍선은 흰 칸으로 그리고, 글자는 한가운데에 들어갑니다. 왼쪽 날개가 꼬리가 되어 캐릭터를 가리킵니다.
-  - 창 너비를 넘는 줄은 잘라서 보드 오른쪽 밖으로 찌꺼기가 남지 않게 하고, 오른쪽 끝에 여백을 둡니다.
-- **work-board**: RAM은 Activity Monitor와 같은 기준(앱 메모리 + wired + 압축)으로 `vm_stat`, `sysctl`에서 읽습니다.
-- **collab-hub**: 경로는 `/` 기준이고, 한글 파일 이름의 NFD/NFC 차이와 대소문자를 같은 파일로 봅니다. `/claim ~/파일`의 `~`는 홈 폴더입니다.
-- **safe-shell**: PowerShell 규칙 대신 macOS 규칙을 씁니다. `/Users/<이름>`, `/System`, `/Library`, `/Applications`, `/usr` 같은 시스템 폴더 삭제와 `diskutil erase…`/`partitionDisk`는 FORBIDDEN입니다.
+</td>
+</tr>
+</table>
 
 <br>
 
@@ -222,68 +191,106 @@ Claude Code 입력창에 아래 줄을 한 줄씩 입력합니다.
 
 ## mod 하나씩 보기
 
-### 🟨 work-board
+### 🟨 work-board · 픽셀 작업 보드
 
-> 화면 오른쪽에 붙는 pixel board pane
+세션을 열면 화면 오른쪽에 자동으로 붙습니다. 화면 구성은 위 [보드 읽는 법](#보드-읽는-법)에 있습니다.
 
-맨 위에 노란 title band가 있습니다. 세션을 열면 자동으로 열리고, `/board close`로 닫아 두면 다음 세션부터는 열리지 않습니다.
-
-- **hero row**: 왼쪽 text column(ANTHROPIC CLAUDE / MODEL / plan badge / WEEK, 5HR limits), 픽셀 Claude sprite, 현재 상태를 말하는 pixel speech bubble. 상태 단어는 THINKING, CODING, RUNNING, TESTING, WRAPPING, DONE, READY, SLEEPING 등입니다.
-- Ultra처럼 5시간 limit이 없는 plan에서는 5HR 줄 대신 week gauge를 보여 줍니다.
-- **STATUS window**: RAM, CONTEXT 게이지(색은 초록, 노랑, 빨강 순). CONTEXT 줄에서 COMPACT 버튼을 쓸 수 있습니다.
-- **tabs**: RUNNING, ROUTING, COLLAB, TIMELINE, USAGE, 그리고 명령 안내 `?` 탭.
-- 요청과 tool step의 timeline, 건드린 files, 주간/5시간 사용량 기록을 보여 줍니다.
-
-### 🟪 agent-router
-
-> subagent를 만들 때 모델을 정해 주는 mod
-
-- type별 규칙(`rules.json`)과 작업 level(L1-L3)로 fable, opus, sonnet, haiku 중 하나를 고릅니다. fork와 workflow는 건드리지 않습니다.
-- 역할은 모델의 능력에 맞춰 나눕니다. 여러 단계를 깊이 따지는 설계는 fable, 계획과 어려운 분석·보안 검토·코드 검토는 opus, 코드 작성은 sonnet, 빠른 찾기는 haiku가 맡습니다. 코드 검토를 opus에 두는 것은 검토하는 모델이 코드를 쓴 모델보다 약하지 않게 하려는 것이라, 코드 검토는 opus 또는 그보다 높은 모델이 맡습니다.
-- 코드 검토와 보안 검토는 평소 opus가 맡고, 설계·아키텍처·근본 원인·장애·여러 파일을 다루거나 아주 긴(3000자 넘는) 검토는 fable로 올립니다. fable을 못 쓰는 계정에서는 opus에 남습니다.
-- 이름이 `reviewer`로 끝나는 agent(typescript-reviewer, ecc:python-reviewer, Code Reviewer 등)는 `rules.json`에 따로 적지 않아도 code-reviewer와 같은 규칙을 따릅니다. type 규칙이 없는 agent도 "리뷰", "코드 검토", "review"가 들어가면 같은 규칙으로 보냅니다.
-- 규칙마다 가장 잘 맞는 모델(`best`)과 그 일을 해낼 수 있는 가장 낮은 모델(`min`)을 적고, 어려운 일일 때 올라갈 수 있는 가장 높은 모델(`up`)을 적을 수 있습니다. 모델 이름만 적으면 셋이 같습니다. 기본 `rules.json`은 아래와 같습니다(`—`는 적지 않은 값).
-
-  | 담당 | best | min | up |
-  |---|:---:|:---:|:---:|
-  | architect | fable | opus | — |
-  | planner | opus | sonnet | — |
-  | code-reviewer · security-reviewer | opus | opus | fable |
-  | tdd-guide | sonnet | sonnet | sonnet |
-  | Explore | haiku | haiku | haiku |
-
-  type 규칙이 없을 때 쓰는 작업 level 기본값은 L3 opus, L2 sonnet, L1 haiku입니다.
-
-- `rules.json`의 `top`에 쓸 수 있는 가장 위 모델을 적습니다(기본 `fable`). fable을 못 쓰면 `"top": "opus"`로 바꿉니다. 그러면 opus가 architect를 맡고, 자기 일 중 sonnet도 해낼 수 있는 planner만 sonnet에 넘깁니다. `min`보다 아래로는 내려가지 않으므로 security-reviewer와 code-reviewer는 opus에 남습니다. `/routing rules`가 지금 배분을 보여 줍니다.
-- 동시 실행 한도(기본 concurrent 6, background 6)를 넘으면 spawn을 막습니다. 한도는 routing이 꺼져 있어도 적용됩니다.
-- 메인 스레드에는 모델을 바꾸지 않고 `/model` 힌트만 toast로 알려 줍니다. 메인 스레드는 opus로 두고, fable은 필요할 때 사람이 고르는 것을 전제로 합니다.
-  - opus에서 설계·아키텍처, 근본 원인 추적, 장애처럼 fable에 맞는 일을 하면 fable을 권합니다. fable을 못 쓰는 계정(`top`이 opus 이하)에서는 권하지 않습니다.
-  - fable에서 평범한 수정·구현을 하면 opus로 내려가라고 알려 줍니다. fable에 맞는 일, 무거운 일, 신호가 없는 짧은 요청에는 알리지 않습니다.
-  - 무거운 일을 opus보다 약한 모델로 하면 한 단계 위를, 가벼운 일을 opus 이상에서 하면 haiku를 권합니다.
-- 메인 스레드가 fable이 아니고 계정에 fable이 있으면, 시스템 프롬프트 끝에 지침을 한 단락 덧붙입니다(`agent-router:fable`). 일은 직접 하되, 설계 결정·근본 원인 추적·장애 디버깅처럼 깊은 판단이 필요한 조각만 `model: "fable"` 담당에게 맡기고, 담당에게 맥락을 빠짐없이 넘기라는 내용입니다. 평범한 수정, 찾기, 검토, 자기 작업 확인은 맡기지 않게 합니다. 지정한 모델은 그대로 지켜집니다. 지침 문장은 바뀌지 않으므로 프롬프트 캐시를 깨지 않습니다.
-
-### 🟩 collab-hub
-
-> 같은 PC에서 돌아가는 세션끼리 쓰는 공유 보드
-
-파일은 `~/.claude/collab-hub/` 아래에 둡니다.
-
-- 60초마다 heartbeat를 남기고 30초마다 다른 세션과 notice를 읽습니다.
-- `/claim`한 파일을 다른 세션이 Edit/Write하려 하면 막고, 먼저 물어보거나 `/release`를 기다리라고 안내합니다.
-- notice는 모든 세션에 toast로 뜹니다(24시간 보관).
-- `[hub]` 메시지(REQUEST 등)를 thread로 묶어 세션 사이 요청과 답을 이어 줍니다.
-
-### 🟥 safe-shell
-
-> Bash와 PowerShell 명령을 실행 전에 검사하는 3단계 guard
-
-| 단계 | 하는 일 |
+| 항목 | 내용 |
 |---|---|
-| **CAUTION** | toast로 알리고 실행합니다. |
-| **DANGER** | 막고 더 안전한 대안을 알려 줍니다. `/allow-once`로 위험한 한 단계만 한 번 통과시킬 수 있습니다(5분 안에 쓰지 않으면 만료). |
-| **FORBIDDEN** | 항상 막습니다. |
+| 말풍선 상태 | `THINKING` `CODING` `RUNNING` `TESTING` `WRAPPING` `DONE` `READY` `SLEEPING` |
+| 게이지 색 | 🟩 여유 → 🟨 주의 → 🟥 거의 참 |
+| CONTEXT 줄 | COMPACT 버튼으로 바로 압축 |
+| 5시간 한도가 없는 플랜 (Ultra 등) | 5HR 줄 대신 week 게이지 |
+| 비우기 | `/board clear`로 timeline과 files 목록 비우기 |
 
-`/safe-shell`이 level 규칙과 이번 세션의 횟수(caution, danger, forbidden)를 보여 줍니다.
+### 🟪 agent-router · 모델 배정
+
+<p align="center"><img src="docs/images/router.png" alt="모델 사다리: FABLE 설계, OPUS 계획·분석·검토, SONNET 코드 작성, HAIKU 빠른 찾기. 오른쪽에 검토는 opus 이상, 무거운 검토는 fable, 동시 실행 한도, fable이 없을 때 규칙" width="100%"></p>
+
+**모델을 고르는 순서**
+
+| 순서 | 기준 | 예 |
+|:---:|---|---|
+| 1 | **type 규칙** (`rules.json`) | architect → fable, Explore → haiku |
+| 2 | 이름이 `reviewer`로 끝나거나 요청에 "리뷰 · 코드 검토 · review"가 있으면 code-reviewer 규칙 | typescript-reviewer, ecc:python-reviewer, Code Reviewer |
+| 3 | type 규칙이 없으면 **작업 level** | L3 opus · L2 sonnet · L1 haiku |
+| — | fork와 workflow는 건드리지 않음 | |
+
+**기본 `rules.json`** (`best` 가장 잘 맞는 모델 · `min` 내려갈 수 있는 가장 낮은 모델 · `up` 무거운 일에 올라갈 모델)
+
+| 담당 | best | min | up |
+|---|:---:|:---:|:---:|
+| architect | fable | opus | — |
+| planner | opus | sonnet | — |
+| code-reviewer · security-reviewer | opus | opus | fable |
+| tdd-guide | sonnet | sonnet | sonnet |
+| Explore | haiku | haiku | haiku |
+
+**계정에 따른 배분** (`rules.json`의 `top`)
+
+| `top` | architect | planner | 코드·보안 검토 | 무거운 검토 |
+|---|:---:|:---:|:---:|:---:|
+| `fable` (기본) | fable | opus | opus | fable |
+| `opus` (fable을 못 쓰는 계정) | opus | sonnet | opus | opus |
+
+> 검토는 `min`이 opus라서 sonnet으로 내려가지 않습니다. `/routing rules`로 지금 배분을 볼 수 있습니다.
+
+**메인 스레드 모델 힌트** · 모델은 바꾸지 않고 알림(toast)만 띄웁니다
+
+| 지금 모델 | 하는 일 | 알림 |
+|---|---|---|
+| opus | 설계 · 아키텍처 · 근본 원인 · 장애 | fable 권함 (fable을 쓸 수 있는 계정만) |
+| fable | 평범한 수정 · 구현 | opus로 내려가라고 알림 |
+| opus보다 약한 모델 | 무거운 일 | 한 단계 위 모델 권함 |
+| opus 이상 | 가벼운 일 | haiku 권함 |
+
+| 그 밖의 규칙 | 내용 |
+|---|---|
+| 동시 실행 한도 | 동시 6개 · 백그라운드 6개를 넘으면 새 subagent를 막음. routing을 꺼도 적용 |
+| fable 지침 | 메인이 fable이 아니고 계정에 fable이 있으면 시스템 프롬프트 끝에 한 단락(`agent-router:fable`)을 덧붙임. 깊은 판단이 필요한 조각만 `model: "fable"` 담당에게 맡기라는 내용. 문장이 바뀌지 않아 프롬프트 캐시를 깨지 않음 |
+
+### 🟩 collab-hub · 세션 협업
+
+<p align="center"><img src="docs/images/collab.png" alt="세 세션이 collab hub에 연결된 그림과 공지, 파일 잠금, 요청과 답 기능" width="100%"></p>
+
+| 기능 | 명령 | 동작 |
+|---|---|---|
+| 📢 공지 | `/notice <text>` | 이 PC의 모든 세션에 알림. 24시간 보관 |
+| 🚩 파일 잠금 | `/claim <file>` · `/release <file>\|all` | 잠근 파일을 다른 세션이 Edit/Write하려 하면 막고, 먼저 묻거나 풀릴 때까지 기다리게 함 |
+| 💬 요청과 답 | `/collab <session> <task>` | `[hub]` REQUEST를 보내고, 답은 한 thread로 이어짐 |
+| 🏷️ 이름 바꾸기 | `/collab name <name>` | 이 세션의 이름 |
+| 📋 세션 보드 | `/collab` | 연결된 세션 보기 |
+
+| 동작 주기 | 저장 위치 |
+|---|---|
+| 60초마다 살아 있음 표시(heartbeat) · 30초마다 다른 세션과 공지 읽기 | `~/.claude/collab-hub/` |
+
+### 🟥 safe-shell · 명령 검사
+
+<p align="center"><img src="docs/images/safe-shell.png" alt="CAUTION 알리고 실행, DANGER 막고 대안 제시, FORBIDDEN 항상 막음. 단계마다 예시 명령" width="100%"></p>
+
+| 단계 | 동작 | 예 | 풀 수 있나 |
+|---|---|---|:---:|
+| 🟨 **CAUTION** | 알림을 띄우고 실행 | 폴더 통째 삭제 · 브랜치 강제 삭제 | 그대로 실행 |
+| 🟧 **DANGER** | 막고 더 안전한 대안을 알려 줌 | 커밋 안 한 변경 버리기 · 원격 기록 덮어쓰기 · DB 테이블 지우기 | `/allow-once`로 위험한 한 단계만 한 번 (5분 지나면 만료) |
+| 🟥 **FORBIDDEN** | 항상 막음 | 루트 · 홈 폴더 삭제 · 드라이브 포맷 · 디스크 덮어쓰기 | ❌ |
+
+`/safe-shell`이 단계별 규칙과 이번 세션의 횟수(caution · danger · forbidden)를 보여 줍니다.
+
+## Windows 버전과 macOS 버전
+
+명령 이름과 기능은 같습니다. macOS 버전은 Mac 기본 터미널에서 깨끗하게 보이도록 아래가 다릅니다. 글꼴이나 터미널 설정은 바꾸지 않아도 됩니다.
+
+| | 🪟 Windows | 🍎 macOS |
+|---|---|---|
+| 설치 이름 | `<mod>@pixel-mods` (저장소 루트) | `<mod>-macos@pixel-mods` (`macos/` 폴더) |
+| 보드 캐릭터 | 블록 글자(`█▄▀`) | 배경색 칸으로만 그림 (Terminal.app은 블록 글자 사이에 틈이 생김) |
+| 창 테두리 | 겹선 `╔═╗` | 둥근 홑선 `╭─╮` (겹선은 점선처럼 끊김) |
+| 말풍선 | 픽셀 말풍선 | 흰 칸 말풍선, 글자는 가운데, 왼쪽 날개가 꼬리 |
+| 긴 줄 | — | 창 너비를 넘으면 자르고 오른쪽 끝에 여백 |
+| RAM | Windows 메모리 정보 | Activity Monitor와 같은 기준(앱 메모리 + wired + 압축), `vm_stat` · `sysctl` |
+| collab-hub 경로 | Windows 경로 | `/` 기준. 한글 파일 이름의 NFD/NFC 차이와 대소문자를 같은 파일로 봄. `~`는 홈 폴더 |
+| safe-shell 규칙 | PowerShell 규칙 (`Remove-Item C:\`, `format C:` 등) | `/Users/<이름>`, `/System`, `/Library`, `/Applications`, `/usr` 삭제와 `diskutil erase…` · `partitionDisk`가 FORBIDDEN |
 
 <br>
 
@@ -295,46 +302,26 @@ Claude Code 입력창에 아래 줄을 한 줄씩 입력합니다.
 
 모든 명령은 Claude Code 입력창에 입력합니다.
 
-**work-board**
-
-| Command | 설명 |
-| --- | --- |
-| `/board` | Work Board를 열거나 닫습니다(토글). |
-| `/board close` | 보드를 닫습니다. |
-| `/board help` | 명령 안내 탭(`?`)을 엽니다. |
-| `/board clear` | timeline과 files 목록을 비웁니다. |
-| `/board 5h on\|off` | 5시간 limit 줄을 보이거나 숨깁니다. |
-| `/board-clear` | `/board clear`와 같습니다. |
-| `/board-5h-on` | `/board 5h on`과 같습니다. |
-| `/board-5h-off` | `/board 5h off`와 같습니다. |
-
-**agent-router**
-
-| Command | 설명 |
-| --- | --- |
-| `/routing` | 라우팅 요약(스위치 상태, 모델별 횟수, 최근 결정)을 보여 줍니다. |
-| `/routing on\|off` | 라우팅 전체를 켜거나 끕니다. |
-| `/routing level on\|off` | 작업 level(L1-L3) 기준 라우팅을 켜거나 끕니다. |
-| `/routing hints on\|off` | 메인 스레드 모델 힌트를 켜거나 끕니다. |
-| `/routing rules` | `rules.json`을 다시 읽고 type별 규칙을 보여 줍니다. |
-
-**collab-hub**
-
-| Command | 설명 |
-| --- | --- |
-| `/collab` | 세션 보드를 보여 줍니다. |
-| `/collab name <name>` | 이 세션의 이름을 바꿉니다. |
-| `/collab <session> <task>` | 다른 세션에 `[hub]` REQUEST를 보냅니다. |
-| `/notice <text>` | 이 PC의 모든 세션에 notice를 올립니다. |
-| `/claim <file>` | 파일을 이 세션이 편집 중이라고 표시합니다. |
-| `/release <file>\|all` | claim을 풀거나 전부 풉니다. |
-
-**safe-shell**
-
-| Command | 설명 |
-| --- | --- |
-| `/allow-once [off]` | 다음 DANGER 명령 하나를 한 번 통과시킵니다. `off`는 취소합니다. |
-| `/safe-shell` | safe-shell level 규칙과 이번 세션 횟수를 보여 줍니다. |
+| mod | 명령 | 설명 |
+|:---:|---|---|
+| 🟨 | `/board` | 보드를 열거나 닫기 (토글) |
+| 🟨 | `/board close` | 보드 닫기 |
+| 🟨 | `/board help` | 명령 안내 탭(`?`) 열기 |
+| 🟨 | `/board clear` · `/board-clear` | timeline과 files 목록 비우기 |
+| 🟨 | `/board 5h on\|off` · `/board-5h-on` · `/board-5h-off` | 5시간 한도 줄 보이기 / 숨기기 |
+| 🟪 | `/routing` | 라우팅 요약 (스위치 상태, 모델별 횟수, 최근 결정) |
+| 🟪 | `/routing on\|off` | 라우팅 전체 켜기 / 끄기 |
+| 🟪 | `/routing level on\|off` | 작업 level(L1-L3) 기준 라우팅 켜기 / 끄기 |
+| 🟪 | `/routing hints on\|off` | 메인 스레드 모델 힌트 켜기 / 끄기 |
+| 🟪 | `/routing rules` | `rules.json`을 다시 읽고 규칙 보여 주기 |
+| 🟩 | `/collab` | 세션 보드 보기 |
+| 🟩 | `/collab name <name>` | 이 세션 이름 바꾸기 |
+| 🟩 | `/collab <session> <task>` | 다른 세션에 `[hub]` REQUEST 보내기 |
+| 🟩 | `/notice <text>` | 이 PC의 모든 세션에 공지 |
+| 🟩 | `/claim <file>` | 파일을 이 세션이 편집 중이라고 잠그기 |
+| 🟩 | `/release <file>\|all` | 잠금 풀기 / 전부 풀기 |
+| 🟥 | `/allow-once [off]` | 다음 DANGER 명령 하나를 한 번 통과 (`off`는 취소) |
+| 🟥 | `/safe-shell` | 단계별 규칙과 이번 세션 횟수 보기 |
 
 <br>
 
@@ -344,7 +331,13 @@ Claude Code 입력창에 아래 줄을 한 줄씩 입력합니다.
 
 ## 폴더 구조
 
-Windows 버전은 저장소 루트의 `<mod>/`, macOS 버전은 `macos/<mod>/` 폴더이고, 루트의 `.claude-plugin/marketplace.json`이 여덟 mod를 한 마켓플레이스로 묶습니다.
+| 위치 | 내용 |
+|---|---|
+| `<mod>/` | Windows 버전 mod |
+| `macos/<mod>/` | macOS 버전 mod |
+| `.claude-plugin/marketplace.json` | 여덟 mod를 한 마켓플레이스로 묶음 |
+| `agent-router/rules.json` | 모델 배정 규칙 |
+| `docs/images/` | README 그림 |
 
 ```text
 <mod>/
@@ -354,19 +347,10 @@ Windows 버전은 저장소 루트의 `<mod>/`, macOS 버전은 `macos/<mod>/` �
   tests/
 ```
 
-agent-router에는 `rules.json`이 함께 있습니다. README 그림은 `docs/images/`에 있습니다.
-
 ## 직접 해 보기
 
-한 세션에서만 써 보려면 mod 폴더를 지정해 실행합니다.
-
-```bash
-claude --plugin-dir <mod folder>
-```
-
-테스트와 검증:
-
-```bash
-claude plugin test <mod folder>
-claude plugin validate <mod folder>
-```
+| 하고 싶은 일 | 명령 |
+|---|---|
+| 한 세션에서만 써 보기 | `claude --plugin-dir <mod folder>` |
+| 테스트 | `claude plugin test <mod folder>` |
+| 검증 | `claude plugin validate <mod folder>` |
